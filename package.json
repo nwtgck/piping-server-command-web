@@ -1,0 +1,34 @@
+{
+  "name": "piping-server-command",
+  "version": "0.1.0-SNAPSHOT",
+  "description": "Piping Server Command Sheet",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "webpack-dev-server --watch",
+    "build": "webpack --mode=production"
+  },
+  "keywords": [],
+  "author": "Ryo Ota <nwtgck@nwtgck.org>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/react": "^16.14.8",
+    "@types/react-dom": "^16.9.13",
+    "@types/url-join": "^4.0.0",
+    "babel-loader": "^8.2.2",
+    "html-webpack-plugin": "^5.3.1",
+    "ts-loader": "^9.2.2",
+    "typescript": "^4.3.2",
+    "webpack": "^5.37.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.2"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.11.4",
+    "@material-ui/icons": "^4.11.2",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "url-join": "^4.0.1"
+  }
+}
