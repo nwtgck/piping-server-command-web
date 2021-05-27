@@ -33,6 +33,31 @@ const simpleFileTransfer = {
   }
 }
 
+const clipboardTransfer = {
+  title: 'Copy & Paste (macOS)',
+  searchTags: ['clipboard'],
+  component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
+    const senderCommand = `pbpaste | curl -T - ${urlJoin(pipingServerUrl, "clip")}`;
+    const receiverCommand = `curl ${urlJoin(pipingServerUrl, "clip")} | pbcopy`;
+    return (
+      <>
+        <TextFieldWithCopy
+          label="Sender"
+          value={senderCommand}
+          rows={1}
+          style={textFieldStyle}
+        />
+
+        <TextFieldWithCopy
+          label="Receiver"
+          value={receiverCommand}
+          rows={1}
+        />
+      </>
+    )
+  }
+}
+
 const zipDirTransfer = {
   title: 'Directory transfer (zip)',
   searchTags: ['folder'],
@@ -74,6 +99,7 @@ export function Main() {
 
   const titleComponents: TitleComponent[] = [
     toTitledComponent(simpleFileTransfer, {pipingServerUrl}),
+    toTitledComponent(clipboardTransfer, {pipingServerUrl}),
     toTitledComponent(zipDirTransfer, {pipingServerUrl}),
   ];
 
