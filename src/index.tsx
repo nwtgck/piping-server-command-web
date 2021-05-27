@@ -18,6 +18,7 @@ const textFieldStyle = {marginBottom: '1.5rem'};
 
 const simpleFileTransfer = {
   title: 'File transfer',
+  searchTags: [],
   component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
     const senderCommand = `curl -T myfile ${urlJoin(pipingServerUrl, "myfile")}`;
     const receiverCommand = `curl ${urlJoin(pipingServerUrl, "myfile")} > myfile`;
@@ -29,7 +30,7 @@ const simpleFileTransfer = {
           rows={1}
           style={textFieldStyle}
           multiline
-          fullWidth={true}
+          fullWidth
           variant="outlined"
         />
 
@@ -38,7 +39,7 @@ const simpleFileTransfer = {
           value={receiverCommand}
           rows={1}
           multiline
-          fullWidth={true}
+          fullWidth
           variant="outlined"
         />
       </>
@@ -48,6 +49,7 @@ const simpleFileTransfer = {
 
 const zipDirTransfer = {
   title: 'Directory transfer (zip)',
+  searchTags: ['folder'],
   component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
     const senderCommand = `zip -q -r - ./mydir | curl -T - ${urlJoin(pipingServerUrl, "mydir.zip")}`;
     const receiverCommand = `curl ${urlJoin(pipingServerUrl, "mydir.zip")} > mydir.zip`; // TODO: extract
@@ -59,7 +61,7 @@ const zipDirTransfer = {
           rows={1}
           style={textFieldStyle}
           multiline
-          fullWidth={true}
+          fullWidth
           variant="outlined"
         />
 
@@ -68,7 +70,7 @@ const zipDirTransfer = {
           value={receiverCommand}
           rows={1}
           multiline
-          fullWidth={true}
+          fullWidth
           variant="outlined"
         />
       </>
@@ -76,20 +78,34 @@ const zipDirTransfer = {
   }
 }
 
+type TitleComponent = { title: string, searchTags: string[], element: JSX.Element };
+
+function toTitledComponent<Props>({title, searchTags, component}: { title: string, searchTags: string[], component: (props: Props) => JSX.Element }, props: Props): TitleComponent {
+  return {
+    title,
+    searchTags,
+    element: component(props),
+  };
+}
+
 function Main() {
   const [pipingServerUrl, setPipingServerUrl] = useState('https://ppng.io');
+  const [searchKeyword, setSearchKeyword] = useState('');
 
-  // NOTE: fill props here
-  const titleComponents: Array<{ title: string, element: JSX.Element }> = [
-    {
-      title: simpleFileTransfer.title,
-      element: simpleFileTransfer.component({pipingServerUrl})
-    },
-    {
-      title: zipDirTransfer.title,
-      element: zipDirTransfer.component({pipingServerUrl})
-    }
+  const titleComponents: TitleComponent[] = [
+    toTitledComponent(simpleFileTransfer, {pipingServerUrl}),
+    toTitledComponent(zipDirTransfer, {pipingServerUrl}),
   ];
+
+  const searches = ({title, searchTags}: TitleComponent): boolean => {
+    if (searchKeyword === '') {
+      return true;
+    }
+    const lowerKeyword = searchKeyword.toLocaleLowerCase();
+    return lowerKeyword.split(/\s+/).filter(s => s !== "").some(keyword =>
+      title.toLocaleLowerCase().search(keyword) !== -1 || searchTags.some(t => t.search(keyword) !== -1)
+    );
+  };
 
   return (
     <div style={{padding: '2rem'}}>
@@ -102,18 +118,21 @@ function Main() {
         />
       </Paper>
 
-      {/* TODO: implement search */}
+      {/* TODO: improve UI */}
       <>
         <TextField
           placeholder="Search"
+          value={searchKeyword}
+          onChange={(e) => setSearchKeyword(e.target.value)}
           inputProps={{ 'aria-label': 'search' }}
+          autoFocus
         />
         <IconButton type="submit" aria-label="search">
           <SearchIcon />
         </IconButton>
       </>
 
-      { titleComponents.map((paper, idx) =>
+      { titleComponents.filter(searches).map((paper, idx) =>
         <Paper elevation={4} style={paperStyle} key={idx}>
           <Typography variant="h6" component="h4" style={{marginBottom: '1rem'}}>
             {paper.title}
