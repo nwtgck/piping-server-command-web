@@ -27,6 +27,7 @@
   "dependencies": {
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",
+    "clipboard-copy": "^4.0.1",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "url-join": "^4.0.1"

@@ -1,11 +1,48 @@
 import * as React from 'react';
-import {IconButton, Paper, TextField, Typography} from '@material-ui/core';
+import {
+  FormControl,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  OutlinedInput,
+  Paper,
+  TextField,
+  Typography
+} from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import {useState} from "react";
 import urlJoin from "url-join";
+import FileCopyIcon from "@material-ui/icons/FileCopy";
+import clipboardCopy from 'clipboard-copy';
 
 const paperStyle = {padding: '1rem', marginBottom: '1.5rem'};
 const textFieldStyle = {marginBottom: '1.5rem'};
+
+function TextFieldWithCopy(props: {label: string, value: string, rows: number, style?: React.CSSProperties}) {
+  // (base: https://material-ui.com/components/text-fields/#input-adornments)
+  return (
+    <FormControl variant="outlined" style={props.style} fullWidth>
+      <InputLabel>{props.label}</InputLabel>
+      <OutlinedInput
+        type="text"
+        value={props.value}
+        multiline
+        rows={props.rows}
+        endAdornment={
+          <InputAdornment position="end">
+            <IconButton
+              aria-label="copy text to the clipboard"
+              onClick={() => clipboardCopy(props.value)}
+              edge="end">
+              <FileCopyIcon />
+            </IconButton>
+          </InputAdornment>
+        }
+        labelWidth={70}
+      />
+    </FormControl>
+  )
+}
 
 const simpleFileTransfer = {
   title: 'File transfer',
@@ -15,23 +52,17 @@ const simpleFileTransfer = {
     const receiverCommand = `curl ${urlJoin(pipingServerUrl, "myfile")} > myfile`;
     return (
       <>
-        <TextField
+        <TextFieldWithCopy
           label="Sender"
           value={senderCommand}
           rows={1}
           style={textFieldStyle}
-          multiline
-          fullWidth
-          variant="outlined"
         />
 
-        <TextField
+        <TextFieldWithCopy
           label="Receiver"
           value={receiverCommand}
           rows={1}
-          multiline
-          fullWidth
-          variant="outlined"
         />
       </>
     )
@@ -46,23 +77,17 @@ const zipDirTransfer = {
     const receiverCommand = `curl ${urlJoin(pipingServerUrl, "mydir.zip")} > mydir.zip`; // TODO: extract
     return (
       <>
-        <TextField
+        <TextFieldWithCopy
           label="Sender"
           value={senderCommand}
           rows={1}
           style={textFieldStyle}
-          multiline
-          fullWidth
-          variant="outlined"
         />
 
-        <TextField
+        <TextFieldWithCopy
           label="Receiver"
           value={receiverCommand}
           rows={1}
-          multiline
-          fullWidth
-          variant="outlined"
         />
       </>
     )
