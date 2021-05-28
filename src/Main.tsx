@@ -1,6 +1,16 @@
 import * as React from 'react';
-import {IconButton, Paper, TextField, Typography} from '@material-ui/core';
+import {
+  FormControl,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  OutlinedInput,
+  Paper,
+  TextField,
+  Typography
+} from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
+import ClearIcon from '@material-ui/icons/Clear';
 import {useState} from "react";
 import urlJoin from "url-join";
 import {TextFieldWithCopy} from "./TextFieldWithCopy";
@@ -93,6 +103,35 @@ function toTitledComponent<Props>({title, searchTags, component}: { title: strin
   };
 }
 
+function CommandSearch({searchKeyword, setSearchKeyword}: {searchKeyword: string, setSearchKeyword: (s: string) => void}) {
+  return (
+    // (base: https://material-ui.com/components/text-fields/#input-adornments)
+    <FormControl variant="outlined" fullWidth style={{marginBottom: '1.5rem'}}>
+      <InputLabel>search</InputLabel>
+      <OutlinedInput
+        type="text"
+        value={searchKeyword}
+        placeholder={'e.g. folder'}
+        onChange={(e) => setSearchKeyword(e.target.value)}
+        startAdornment={<SearchIcon/>}
+        autoFocus
+        endAdornment={
+          searchKeyword === '' ? undefined :
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="clear search keyword"
+                onClick={() => setSearchKeyword('')}
+                edge="end">
+                <ClearIcon />
+              </IconButton>
+            </InputAdornment>
+        }
+        labelWidth={70}
+      />
+    </FormControl>
+  )
+}
+
 export function Main() {
   const [pipingServerUrl, setPipingServerUrl] = useState('https://ppng.io');
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -124,19 +163,10 @@ export function Main() {
         />
       </Paper>
 
-      {/* TODO: improve UI */}
-      <>
-        <TextField
-          placeholder="Search"
-          value={searchKeyword}
-          onChange={(e) => setSearchKeyword(e.target.value)}
-          inputProps={{ 'aria-label': 'search' }}
-          autoFocus
-        />
-        <IconButton type="submit" aria-label="search">
-          <SearchIcon />
-        </IconButton>
-      </>
+      <CommandSearch
+        searchKeyword={searchKeyword}
+        setSearchKeyword={setSearchKeyword}
+      />
 
       { titleComponents.filter(searches).map((paper, idx) =>
         <Paper elevation={4} style={paperStyle} key={idx}>
