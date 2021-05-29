@@ -108,7 +108,8 @@ const portForwarding = {
     // NOTE: port as string because number does not allow empty input
     const [serverHostPort, setServerHostPort] = useState('22');
     const [clientHostPort, setClientHostPort] = useState('1022');
-    const [clientHostServe, setClientHostServe] = useState<'nc -l' | 'nc -lp' | 'socat'>('nc -l');
+    // NOTE: nc -lp should be default because BSD nc emits an error when using `nc -lp`, but GNU nc has no error when using `nc -l` for noticing users proper command.
+    const [clientHostServe, setClientHostServe] = useState<'nc -l' | 'nc -lp' | 'socat'>('nc -lp');
     const [e2ee, setE2ee] = useState<'none' | 'openssl'>('none');
     const [opensslPass, setOpensslPass] = useState(generatePassword(20));
 
@@ -204,8 +205,8 @@ const portForwarding = {
           <FormControl style={{marginRight: '1rem'}}>
             <FormLabel>client host serving</FormLabel>
             <RadioGroup row aria-label="position" name="position" defaultValue="nc -l" value={clientHostServe} onChange={(e) => onChangeClientHostServe(e.target.value)}>
-              <FormControlLabel value="nc -l" control={<Radio color="primary" />} label="nc -l" />
-              <FormControlLabel value="nc -lp" control={<Radio color="primary" />} label="nc -lp" />
+              <FormControlLabel value="nc -lp" control={<Radio color="primary" />} label="GNU: nc -lp" />
+              <FormControlLabel value="nc -l" control={<Radio color="primary" />} label="BSD: nc -l" />
               <FormControlLabel value="socat" control={<Radio color="primary" />} label="socat" />
             </RadioGroup>
           </FormControl>
