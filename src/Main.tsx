@@ -93,6 +93,14 @@ const zipDirTransfer = {
   }
 }
 
+function generatePassword(passwordLen: number): string {
+  const alphas  = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
+  const numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+  const chars   = [...alphas, ...numbers, ];
+  const randomArr = window.crypto.getRandomValues(new Uint32Array(passwordLen));
+  return Array.from(randomArr).map(n => chars[n % chars.length]).join('');
+}
+
 const portForwarding = {
   title: 'Port forwarding',
   searchTags: ['tunnel'],
@@ -101,6 +109,8 @@ const portForwarding = {
     const [serverHostPort, setServerHostPort] = useState('22');
     const [clientHostPort, setClientHostPort] = useState('1022');
     const [clientHostServe, setClientHostServe] = useState<'nc -l' | 'nc -lp' | 'socat'>('nc -l');
+    const [e2ee, setE2ee] = useState<'none' | 'openssl'>('none');
+    const [opensslPass, setOpensslPass] = useState(generatePassword(20));
 
     function onChangeClientHostServe(s: string) {
       switch (s) {
@@ -114,7 +124,43 @@ const portForwarding = {
       }
     }
 
-    const serverHostCommand = `curl -sSN ${urlJoin(pipingServerUrl, "aaa")} | nc localhost ${serverHostPort} | curl -sSNT - ${urlJoin(pipingServerUrl, "bbb")}`;
+    function onChangeE2ee(s: string) {
+      switch (s) {
+        case 'none':
+        case 'openssl':
+          setE2ee(s);
+          break;
+        default:
+          throw new Error(`unexpected e2ee: ${s}`);
+      }
+    }
+
+    const encryptIfNeed = (() => {
+      switch (e2ee) {
+        case "none":
+          return [];
+        case "openssl":
+          return [ `stdbuf -i0 -o0 openssl aes-256-ctr -pass "pass:${opensslPass}" -bufsize 1 -pbkdf2` ];
+      }
+    })();
+
+    const decryptIfNeed = (() => {
+      switch (e2ee) {
+        case "none":
+          return [];
+        case "openssl":
+          return [ `stdbuf -i0 -o0 openssl aes-256-ctr -d -pass "pass:${opensslPass}" -bufsize 1 -pbkdf2` ];
+      }
+    })();
+
+    const serverHostCommand = [
+      `curl -sSN ${urlJoin(pipingServerUrl, "aaa")}`,
+      ...decryptIfNeed,
+      `nc localhost ${serverHostPort}`,
+      ...encryptIfNeed,
+      `curl -sSNT - ${urlJoin(pipingServerUrl, "bbb")}`
+    ].join(' | ');
+
     const clientHostServeCommand = (() => {
       switch (clientHostServe) {
         case 'nc -l':
@@ -124,20 +170,29 @@ const portForwarding = {
           return `socat TCP-LISTEN:${clientHostPort} -`;
       }
     })();
-    const clientHostCommand = `curl -NsS ${urlJoin(pipingServerUrl, "bbb")} | ${clientHostServeCommand} | curl -NsST - ${urlJoin(pipingServerUrl, "aaa")}`;
+    const clientHostCommand = [
+      `curl -NsS ${urlJoin(pipingServerUrl, "bbb")}`,
+      ...decryptIfNeed,
+      clientHostServeCommand,
+      ...encryptIfNeed,
+      `curl -NsST - ${urlJoin(pipingServerUrl, "aaa")}`
+    ].join(' | ');
+
+    const textFieldRows = e2ee === 'openssl' ? 3 : 1;
+
     return (
       <>
         <TextFieldWithCopy
           label="Server host"
           value={serverHostCommand}
-          rows={1}
+          rows={textFieldRows}
           style={textFieldStyle}
         />
 
         <TextFieldWithCopy
           label="Client host"
           value={clientHostCommand}
-          rows={1}
+          rows={textFieldRows}
         />
 
         <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
@@ -145,14 +200,26 @@ const portForwarding = {
           <TextField label="client host port" type="number" value={clientHostPort} onChange={(e) => setClientHostPort(e.target.value)}/>
         </div>
 
-        <FormControl>
-          <FormLabel>client host serving</FormLabel>
-          <RadioGroup row aria-label="position" name="position" defaultValue="nc -l" value={clientHostServe} onChange={(e) => onChangeClientHostServe(e.target.value)}>
-            <FormControlLabel value="nc -l" control={<Radio color="primary" />} label="nc -l" />
-            <FormControlLabel value="nc -lp" control={<Radio color="primary" />} label="nc -lp" />
-            <FormControlLabel value="socat" control={<Radio color="primary" />} label="socat" />
-          </RadioGroup>
-        </FormControl>
+        <div>
+          <FormControl style={{marginRight: '1rem'}}>
+            <FormLabel>client host serving</FormLabel>
+            <RadioGroup row aria-label="position" name="position" defaultValue="nc -l" value={clientHostServe} onChange={(e) => onChangeClientHostServe(e.target.value)}>
+              <FormControlLabel value="nc -l" control={<Radio color="primary" />} label="nc -l" />
+              <FormControlLabel value="nc -lp" control={<Radio color="primary" />} label="nc -lp" />
+              <FormControlLabel value="socat" control={<Radio color="primary" />} label="socat" />
+            </RadioGroup>
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>E2E encryption</FormLabel>
+            <RadioGroup row aria-label="position" name="position" defaultValue="none" value={e2ee} onChange={(e) => onChangeE2ee(e.target.value)}>
+              <FormControlLabel value="none" control={<Radio color="primary" />} label="none" />
+              <FormControlLabel value="openssl" control={<Radio color="primary" />} label="openssl" />
+            </RadioGroup>
+          </FormControl>
+          {/* TODO: hide password by default and hide command text fields too when using openssl */}
+          { e2ee === "openssl" ? <TextField label="openssl pass" value={opensslPass} onChange={(e) => setOpensslPass(e.target.value)}/> : undefined }
+        </div>
       </>
     )
   }
