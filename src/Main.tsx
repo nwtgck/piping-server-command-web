@@ -74,7 +74,7 @@ const zipDirTransfer = {
   title: 'Directory transfer (zip)',
   searchTags: ['folder'],
   component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
-    const senderCommand = `zip -q -r - ./mydir | curl -T - ${urlJoin(pipingServerUrl, "mydir.zip")}`;
+    const senderCommand = `zip -r - ./mydir | curl -T - ${urlJoin(pipingServerUrl, "mydir.zip")}`;
     const receiverCommand = `curl ${urlJoin(pipingServerUrl, "mydir.zip")} > mydir.zip`; // TODO: extract
     return (
       <>
@@ -107,7 +107,7 @@ const portForwarding = {
   title: 'Port forwarding',
   searchTags: ['tunnel'],
   component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
-    // NOTE: port as string because number does not allow empty input
+    // NOTE: ports are string because number does not allow empty input
     const [serverHostPort, setServerHostPort] = useState('22');
     const [clientHostPort, setClientHostPort] = useState('1022');
     // NOTE: nc -lp should be default because BSD nc emits an error when using `nc -lp`, but GNU nc has no error when using `nc -l` for noticing users proper command.
