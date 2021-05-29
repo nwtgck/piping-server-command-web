@@ -11,7 +11,7 @@ import {
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import ClearIcon from '@material-ui/icons/Clear';
-import {useState} from "react";
+import {useRef, useState} from "react";
 import urlJoin from "url-join";
 import {TextFieldWithCopy} from "./TextFieldWithCopy";
 
@@ -93,6 +93,37 @@ const zipDirTransfer = {
   }
 }
 
+const portForwarding = {
+  title: 'Port forwarding',
+  searchTags: ['tunnel'],
+  component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
+    // NOTE: port as string because number does not allow empty input
+    const [serverHostPort, setServerHostPort] = useState('22');
+    const [clientHostPort, setClientHostPort] = useState('1022');
+    const senderCommand = `curl -sSN ${urlJoin(pipingServerUrl, "aaa")} | nc localhost ${serverHostPort} | curl -sSNT - ${urlJoin(pipingServerUrl, "bbb")}`;
+    const receiverCommand = `curl -NsS ${urlJoin(pipingServerUrl, "bbb")} | nc -l -p ${clientHostPort} | curl -NsST - ${urlJoin(pipingServerUrl, "aaa")}`;
+    return (
+      <>
+        <TextFieldWithCopy
+          label="Server host"
+          value={senderCommand}
+          rows={1}
+          style={textFieldStyle}
+        />
+
+        <TextFieldWithCopy
+          label="Client host"
+          value={receiverCommand}
+          rows={1}
+        />
+
+        <TextField label="server host port" type="number" value={serverHostPort} onChange={(e) => setServerHostPort(e.target.value)}/>
+        <TextField label="client host port" type="number" value={clientHostPort} onChange={(e) => setClientHostPort(e.target.value)}/>
+      </>
+    )
+  }
+};
+
 type TitleComponent = { title: string, searchTags: string[], element: JSX.Element };
 
 function toTitledComponent<Props>({title, searchTags, component}: { title: string, searchTags: string[], component: (props: Props) => JSX.Element }, props: Props): TitleComponent {
@@ -140,6 +171,7 @@ export function Main() {
     toTitledComponent(simpleFileTransfer, {pipingServerUrl}),
     toTitledComponent(clipboardTransfer, {pipingServerUrl}),
     toTitledComponent(zipDirTransfer, {pipingServerUrl}),
+    toTitledComponent(portForwarding, {pipingServerUrl}),
   ];
 
   const searches = ({title, searchTags}: TitleComponent): boolean => {
