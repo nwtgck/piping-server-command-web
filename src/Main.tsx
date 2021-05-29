@@ -14,6 +14,7 @@ import ClearIcon from '@material-ui/icons/Clear';
 import {useState} from "react";
 import urlJoin from "url-join";
 import {TextFieldWithCopy} from "./TextFieldWithCopy";
+import {PasswordField} from "./PasswordField";
 
 const paperStyle = {padding: '1rem', marginBottom: '1.5rem'};
 const textFieldStyle = {marginBottom: '1.5rem'};
@@ -186,6 +187,7 @@ const portForwarding = {
         <TextFieldWithCopy
           label="Server host"
           value={serverHostCommand}
+          type={e2ee === 'openssl' ? 'password' : 'text'}
           rows={textFieldRows}
           style={textFieldStyle}
         />
@@ -193,6 +195,7 @@ const portForwarding = {
         <TextFieldWithCopy
           label="Client host"
           value={clientHostCommand}
+          type={e2ee === 'openssl' ? 'password' : 'text'}
           rows={textFieldRows}
         />
 
@@ -218,8 +221,7 @@ const portForwarding = {
               <FormControlLabel value="openssl" control={<Radio color="primary" />} label="openssl" />
             </RadioGroup>
           </FormControl>
-          {/* TODO: hide password by default and hide command text fields too when using openssl */}
-          { e2ee === "openssl" ? <TextField label="openssl pass" value={opensslPass} onChange={(e) => setOpensslPass(e.target.value)}/> : undefined }
+          { e2ee === "openssl" ? <PasswordField label="openssl pass" value={opensslPass} onChange={setOpensslPass}/> : undefined }
         </div>
       </>
     )
