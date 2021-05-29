@@ -11,7 +11,7 @@ import {
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import ClearIcon from '@material-ui/icons/Clear';
-import {useRef, useState} from "react";
+import {useState} from "react";
 import urlJoin from "url-join";
 import {TextFieldWithCopy} from "./TextFieldWithCopy";
 
@@ -197,9 +197,15 @@ function CommandSearch({searchKeyword, setSearchKeyword}: {searchKeyword: string
   )
 }
 
+function parseHashAsQuery(): URLSearchParams {
+  const url = new URL(`a://a${location.hash.substring(1)}`);
+  return url.searchParams;
+}
+
 export function Main() {
+  const keywordQueryParamName = 'q';
   const [pipingServerUrl, setPipingServerUrl] = useState('https://ppng.io');
-  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState(parseHashAsQuery().get(keywordQueryParamName) ?? '');
 
   const titleComponents: TitleComponent[] = [
     toTitledComponent(simpleFileTransfer, {pipingServerUrl}),
@@ -218,6 +224,11 @@ export function Main() {
     );
   };
 
+  function onSearchKeywordChanged(keyword: string) {
+    setSearchKeyword(keyword);
+    location.hash = (keyword === '') ? '' : `?${keywordQueryParamName}=${encodeURIComponent(keyword)}`
+  }
+
   return (
     <div style={{padding: '2rem'}}>
       <Paper elevation={4} style={paperStyle}>
@@ -231,7 +242,7 @@ export function Main() {
 
       <CommandSearch
         searchKeyword={searchKeyword}
-        setSearchKeyword={setSearchKeyword}
+        setSearchKeyword={onSearchKeywordChanged}
       />
 
       { titleComponents.filter(searches).map((paper, idx) =>
