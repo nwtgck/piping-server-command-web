@@ -1,11 +1,11 @@
 import * as React from 'react';
 import {
-  FormControl,
+  FormControl, FormControlLabel, FormLabel,
   IconButton,
   InputAdornment,
   InputLabel,
   OutlinedInput,
-  Paper,
+  Paper, Radio, RadioGroup,
   TextField,
   Typography
 } from '@material-ui/core';
@@ -100,25 +100,59 @@ const portForwarding = {
     // NOTE: port as string because number does not allow empty input
     const [serverHostPort, setServerHostPort] = useState('22');
     const [clientHostPort, setClientHostPort] = useState('1022');
-    const senderCommand = `curl -sSN ${urlJoin(pipingServerUrl, "aaa")} | nc localhost ${serverHostPort} | curl -sSNT - ${urlJoin(pipingServerUrl, "bbb")}`;
-    const receiverCommand = `curl -NsS ${urlJoin(pipingServerUrl, "bbb")} | nc -l -p ${clientHostPort} | curl -NsST - ${urlJoin(pipingServerUrl, "aaa")}`;
+    const [clientHostServe, setClientHostServe] = useState<'nc -l' | 'nc -lp' | 'socat'>('nc -l');
+
+    function onChangeClientHostServe(s: string) {
+      switch (s) {
+        case 'nc -l':
+        case 'nc -lp':
+        case 'socat':
+          setClientHostServe(s);
+          break;
+        default:
+          throw new Error(`unexpected client host serve: ${s}`);
+      }
+    }
+
+    const serverHostCommand = `curl -sSN ${urlJoin(pipingServerUrl, "aaa")} | nc localhost ${serverHostPort} | curl -sSNT - ${urlJoin(pipingServerUrl, "bbb")}`;
+    const clientHostServeCommand = (() => {
+      switch (clientHostServe) {
+        case 'nc -l':
+        case 'nc -lp':
+          return `${clientHostServe} ${clientHostPort}`;
+        case 'socat':
+          return `socat TCP-LISTEN:${clientHostPort} -`;
+      }
+    })();
+    const clientHostCommand = `curl -NsS ${urlJoin(pipingServerUrl, "bbb")} | ${clientHostServeCommand} | curl -NsST - ${urlJoin(pipingServerUrl, "aaa")}`;
     return (
       <>
         <TextFieldWithCopy
           label="Server host"
-          value={senderCommand}
+          value={serverHostCommand}
           rows={1}
           style={textFieldStyle}
         />
 
         <TextFieldWithCopy
           label="Client host"
-          value={receiverCommand}
+          value={clientHostCommand}
           rows={1}
         />
 
-        <TextField label="server host port" type="number" value={serverHostPort} onChange={(e) => setServerHostPort(e.target.value)}/>
-        <TextField label="client host port" type="number" value={clientHostPort} onChange={(e) => setClientHostPort(e.target.value)}/>
+        <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
+          <TextField label="server host port" type="number" value={serverHostPort} onChange={(e) => setServerHostPort(e.target.value)}/>
+          <TextField label="client host port" type="number" value={clientHostPort} onChange={(e) => setClientHostPort(e.target.value)}/>
+        </div>
+
+        <FormControl>
+          <FormLabel>client host serving</FormLabel>
+          <RadioGroup row aria-label="position" name="position" defaultValue="nc -l" value={clientHostServe} onChange={(e) => onChangeClientHostServe(e.target.value)}>
+            <FormControlLabel value="nc -l" control={<Radio color="primary" />} label="nc -l" />
+            <FormControlLabel value="nc -lp" control={<Radio color="primary" />} label="nc -lp" />
+            <FormControlLabel value="socat" control={<Radio color="primary" />} label="socat" />
+          </RadioGroup>
+        </FormControl>
       </>
     )
   }
