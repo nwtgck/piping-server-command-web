@@ -14,7 +14,8 @@ import ClearIcon from '@material-ui/icons/Clear';
 import {useState} from "react";
 import urlJoin from "url-join";
 import {TextFieldWithCopy} from "./TextFieldWithCopy";
-import {PasswordField} from "./PasswordField";
+import VisibilityIcon from "@material-ui/icons/Visibility";
+import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 
 const paperStyle = {padding: '1rem', marginBottom: '1.5rem'};
 const textFieldStyle = {marginBottom: '1.5rem'};
@@ -113,6 +114,7 @@ const portForwarding = {
     const [clientHostServe, setClientHostServe] = useState<'nc -l' | 'nc -lp' | 'socat'>('nc -lp');
     const [e2ee, setE2ee] = useState<'none' | 'openssl'>('none');
     const [opensslPass, setOpensslPass] = useState(generatePassword(20));
+    const [opensslPassIsVisible, setOpensslPassIsVisible] = useState(true);
 
     function onChangeClientHostServe(s: string) {
       switch (s) {
@@ -130,6 +132,7 @@ const portForwarding = {
       switch (s) {
         case 'none':
         case 'openssl':
+          setOpensslPassIsVisible(s !== 'openssl');
           setE2ee(s);
           break;
         default:
@@ -187,7 +190,7 @@ const portForwarding = {
         <TextFieldWithCopy
           label="Server host"
           value={serverHostCommand}
-          type={e2ee === 'openssl' ? 'password' : 'text'}
+          isVisible={opensslPassIsVisible}
           rows={textFieldRows}
           style={textFieldStyle}
         />
@@ -195,7 +198,7 @@ const portForwarding = {
         <TextFieldWithCopy
           label="Client host"
           value={clientHostCommand}
-          type={e2ee === 'openssl' ? 'password' : 'text'}
+          isVisible={opensslPassIsVisible}
           rows={textFieldRows}
         />
 
@@ -221,7 +224,19 @@ const portForwarding = {
               <FormControlLabel value="openssl" control={<Radio color="primary" />} label="openssl" />
             </RadioGroup>
           </FormControl>
-          { e2ee === "openssl" ? <PasswordField label="openssl pass" value={opensslPass} onChange={setOpensslPass}/> : undefined }
+          { e2ee === "openssl" ?
+            <>
+              <TextField label="openssl pass" value={opensslPass} type={opensslPassIsVisible ? 'text' : 'password'} onChange={(e) => setOpensslPass(e.target.value)}/>
+              <IconButton
+                style={{marginTop: '0.5rem'}}
+                aria-label="mask or unmask openssl pass"
+                onClick={() => setOpensslPassIsVisible(!opensslPassIsVisible)}
+                edge="end">
+                { opensslPassIsVisible ? <VisibilityIcon /> : <VisibilityOffIcon /> }
+              </IconButton>
+            </>
+            : undefined
+          }
         </div>
       </>
     )
