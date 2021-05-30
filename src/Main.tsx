@@ -323,6 +323,7 @@ export function Main() {
   const [pipingServerUrl, setPipingServerUrl] = useState('https://ppng.io');
   const [searchKeyword, setSearchKeyword] = useState(parseHashAsQuery().get(keywordQueryParamName) ?? '');
 
+  // NOTE: currently all props need the same props, but in the future, they may need different ones
   const titleComponents: TitleComponent[] = [
     toTitledComponent(simpleFileTransfer, {pipingServerUrl}),
     toTitledComponent(clipboardTransfer, {pipingServerUrl}),
