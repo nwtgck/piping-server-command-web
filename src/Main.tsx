@@ -16,7 +16,7 @@ import {fileTransfer} from "./command-componets/file-transfer";
 import {clipboardTransfer} from "./command-componets/clipboard-transfer";
 import {zipDirTransfer} from "./command-componets/zip-dir-transfer";
 import {tarDirTransfer} from "./command-componets/tar-dir-transfer";
-import {e2eePortForwarding, portForwarding} from "./command-componets/port-forwarding";
+import {ClientHostServe, e2eePortForwarding, portForwarding} from "./command-componets/port-forwarding";
 
 type TitleComponent = { title: string, searchTags: string[], element: JSX.Element };
 
@@ -80,16 +80,18 @@ export function Main() {
   const [pipingServerUrl, setPipingServerUrl] = useState(pipingServerUrls[0]);
   const [randomString, setRandomString] = useState(generateRandomPathString());
   const [searchKeyword, setSearchKeyword] = useState(parseHashAsQuery().get(keywordQueryParamName) ?? '');
+  // NOTE: nc -lp should be default because BSD nc emits an error when using `nc -lp`, but GNU nc has no error when using `nc -l` for noticing users proper command.
+  const clientHostServeState = useState<ClientHostServe>('nc -lp');
+
   const paperStyle = {padding: '1rem', marginBottom: '1.5rem'};
 
-  // NOTE: currently all props need the same props, but in the future, they may need different ones
   const titleComponents: TitleComponent[] = [
     toTitledComponent(fileTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(clipboardTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(tarDirTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(zipDirTransfer, {pipingServerUrl, randomString}),
-    toTitledComponent(portForwarding, {pipingServerUrl, randomString}),
-    toTitledComponent(e2eePortForwarding, {pipingServerUrl, randomString}),
+    toTitledComponent(portForwarding, {pipingServerUrl, randomString, clientHostServeState}),
+    toTitledComponent(e2eePortForwarding, {pipingServerUrl, randomString, clientHostServeState}),
   ];
 
   const searches = ({title, searchTags}: TitleComponent): boolean => {

@@ -9,7 +9,19 @@ import {RadioInput} from "@/RadioInput";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import {textFieldContainerGridSpacing} from "./share";
+import {ReactState} from "@/utils";
 
+export type ClientHostServe = 'nc -l' | 'nc -lp' | 'socat';
+
+function getClientHostServeCommand(clientHostServe: ClientHostServe, clientHostPort: string): string {
+  switch (clientHostServe) {
+    case 'nc -l':
+    case 'nc -lp':
+      return `${clientHostServe} ${clientHostPort}`;
+    case 'socat':
+      return `socat TCP-LISTEN:${clientHostPort} -`;
+  }
+}
 
 function generatePassword(passwordLen: number): string {
   const alphas  = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
@@ -22,12 +34,11 @@ function generatePassword(passwordLen: number): string {
 export const portForwarding = {
   title: 'Port forwarding',
   searchTags: ['tunnel', 'e2ee', 'end-to-end', 'encryption'],
-  component: ({pipingServerUrl, randomString}: {pipingServerUrl: string, randomString: string}) => {
+  component: ({pipingServerUrl, randomString, clientHostServeState}: {pipingServerUrl: string, randomString: string, clientHostServeState: ReactState<ClientHostServe>}) => {
     // NOTE: ports are string because number does not allow empty input
     const [serverHostPort, setServerHostPort] = useState('22');
     const [clientHostPort, setClientHostPort] = useState('1022');
-    // NOTE: nc -lp should be default because BSD nc emits an error when using `nc -lp`, but GNU nc has no error when using `nc -l` for noticing users proper command.
-    const [clientHostServe, setClientHostServe] = useState<'nc -l' | 'nc -lp' | 'socat'>('nc -lp');
+    const [clientHostServe, setClientHostServe] = clientHostServeState;
     const [e2ee, setE2ee] = useState<'none' | 'openssl'>('none');
     const [opensslPass, setOpensslPass] = useState(generatePassword(20));
     const [opensslPassIsVisible, setOpensslPassIsVisible] = useState(true);
@@ -57,20 +68,10 @@ export const portForwarding = {
       ...encryptIfNeed,
       `curl -sSNT - ${urlJoin(pipingServerUrl, `bbb${randomString}`)}`
     ].join(' | ');
-
-    const clientHostServeCommand = (() => {
-      switch (clientHostServe) {
-        case 'nc -l':
-        case 'nc -lp':
-          return `${clientHostServe} ${clientHostPort}`;
-        case 'socat':
-          return `socat TCP-LISTEN:${clientHostPort} -`;
-      }
-    })();
     const clientHostCommand = [
       `curl -NsS ${urlJoin(pipingServerUrl, `bbb${randomString}`)}`,
       ...decryptIfNeed,
-      clientHostServeCommand,
+      getClientHostServeCommand(clientHostServe, clientHostPort),
       ...encryptIfNeed,
       `curl -NsST - ${urlJoin(pipingServerUrl, `aaa${randomString}`)}`
     ].join(' | ');
@@ -152,12 +153,11 @@ export const portForwarding = {
 export const e2eePortForwarding = {
   title: 'Port forwarding (E2EE inputting pass)',
   searchTags: ['tunnel', 'e2ee', 'end-to-end', 'encryption'],
-  component: ({pipingServerUrl, randomString}: {pipingServerUrl: string, randomString: string}) => {
+  component: ({pipingServerUrl, randomString, clientHostServeState}: {pipingServerUrl: string, randomString: string, clientHostServeState: ReactState<ClientHostServe>}) => {
     // NOTE: ports are string because number does not allow empty input
     const [serverHostPort, setServerHostPort] = useState('22');
     const [clientHostPort, setClientHostPort] = useState('1022');
-    // NOTE: nc -lp should be default because BSD nc emits an error when using `nc -lp`, but GNU nc has no error when using `nc -l` for noticing users proper command.
-    const [clientHostServe, setClientHostServe] = useState<'nc -l' | 'nc -lp' | 'socat'>('nc -lp');
+    const [clientHostServe, setClientHostServe] = clientHostServeState;
 
     const encryptCommand = `stdbuf -i0 -o0 openssl aes-256-ctr -pass "pass:$pass" -bufsize 1 -pbkdf2`;
     const decryptCommand = `stdbuf -i0 -o0 openssl aes-256-ctr -d -pass "pass:$pass" -bufsize 1 -pbkdf2`;
@@ -168,20 +168,10 @@ export const e2eePortForwarding = {
       encryptCommand,
       `curl -sSNT - ${urlJoin(pipingServerUrl, `bbb${randomString}`)}`
     ].join(' | ');
-
-    const clientHostServeCommand = (() => {
-      switch (clientHostServe) {
-        case 'nc -l':
-        case 'nc -lp':
-          return `${clientHostServe} ${clientHostPort}`;
-        case 'socat':
-          return `socat TCP-LISTEN:${clientHostPort} -`;
-      }
-    })();
     const clientHostCommand = [
       `read -p "password: " -s pass &&  curl -NsS ${urlJoin(pipingServerUrl, `bbb${randomString}`)}`,
       decryptCommand,
-      clientHostServeCommand,
+      getClientHostServeCommand(clientHostServe, clientHostPort),
       encryptCommand,
       `curl -NsST - ${urlJoin(pipingServerUrl, `aaa${randomString}`)}`
     ].join(' | ');
