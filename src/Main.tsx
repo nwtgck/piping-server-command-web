@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
   FormControl,
+  Grid,
   IconButton,
   InputAdornment,
   InputLabel,
@@ -18,7 +19,7 @@ import {RadioInput} from "./RadioInput";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 
-const textFieldStyle = {marginBottom: '1.5rem'};
+const textFieldContainerGridSpacing = 2;
 
 const simpleFileTransfer = {
   title: 'File transfer',
@@ -27,20 +28,22 @@ const simpleFileTransfer = {
     const senderCommand = `curl -T myfile ${urlJoin(pipingServerUrl, "myfile")}`;
     const receiverCommand = `curl ${urlJoin(pipingServerUrl, "myfile")} > myfile`;
     return (
-      <>
-        <TextFieldWithCopy
-          label="Sender"
-          value={senderCommand}
-          rows={1}
-          style={textFieldStyle}
-        />
-
-        <TextFieldWithCopy
-          label="Receiver"
-          value={receiverCommand}
-          rows={1}
-        />
-      </>
+      <Grid container spacing={textFieldContainerGridSpacing}>
+        <Grid item xs={12}>
+          <TextFieldWithCopy
+            label="Sender"
+            value={senderCommand}
+            rows={1}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextFieldWithCopy
+            label="Receiver"
+            value={receiverCommand}
+            rows={1}
+          />
+        </Grid>
+      </Grid>
     )
   }
 }
@@ -52,20 +55,22 @@ const clipboardTransfer = {
     const senderCommand = `pbpaste | curl -T - ${urlJoin(pipingServerUrl, "clip")}`;
     const receiverCommand = `curl ${urlJoin(pipingServerUrl, "clip")} | pbcopy`;
     return (
-      <>
-        <TextFieldWithCopy
-          label="Sender"
-          value={senderCommand}
-          rows={1}
-          style={textFieldStyle}
-        />
-
-        <TextFieldWithCopy
-          label="Receiver"
-          value={receiverCommand}
-          rows={1}
-        />
-      </>
+      <Grid container spacing={textFieldContainerGridSpacing}>
+        <Grid item xs={12}>
+          <TextFieldWithCopy
+            label="Sender"
+            value={senderCommand}
+            rows={1}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextFieldWithCopy
+            label="Receiver"
+            value={receiverCommand}
+            rows={1}
+          />
+        </Grid>
+      </Grid>
     )
   }
 }
@@ -77,20 +82,22 @@ const zipDirTransfer = {
     const senderCommand = `zip -r - . | curl -T - ${urlJoin(pipingServerUrl, "mydir.zip")}`;
     const receiverCommand = `curl ${urlJoin(pipingServerUrl, "mydir.zip")} > mydir.zip`; // TODO: extract
     return (
-      <>
-        <TextFieldWithCopy
-          label="Sender"
-          value={senderCommand}
-          rows={1}
-          style={textFieldStyle}
-        />
-
-        <TextFieldWithCopy
-          label="Receiver"
-          value={receiverCommand}
-          rows={1}
-        />
-      </>
+      <Grid container spacing={textFieldContainerGridSpacing}>
+        <Grid item xs={12}>
+          <TextFieldWithCopy
+            label="Sender"
+            value={senderCommand}
+            rows={1}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextFieldWithCopy
+            label="Receiver"
+            value={receiverCommand}
+            rows={1}
+          />
+        </Grid>
+      </Grid>
     )
   }
 }
@@ -105,33 +112,35 @@ const tarDirTransfer = {
     const receiverCommand = `curl ${urlJoin(pipingServerUrl, `mydir.${tarOrTargz}`)} | tar x`;
 
     return (
-      <>
-        <TextFieldWithCopy
-          label="Sender"
-          value={senderCommand}
-          rows={1}
-          style={textFieldStyle}
-        />
-
-        <TextFieldWithCopy
-          label="Receiver"
-          value={receiverCommand}
-          rows={1}
-        />
-
-        <RadioInput
-          style={{marginTop: '1rem'}}
-          label="tar/tar.gz"
-          value={tarOrTargz}
-          onChange={setTarOrTargz}
-          selections={
-            [
-              { label: 'tar', value: 'tar' },
-              { label: 'tar.gz', value: 'tar.gz' },
-            ]
-          }
-        />
-      </>
+      <Grid container spacing={textFieldContainerGridSpacing}>
+        <Grid item xs={12}>
+          <TextFieldWithCopy
+            label="Sender"
+            value={senderCommand}
+            rows={1}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextFieldWithCopy
+            label="Receiver"
+            value={receiverCommand}
+            rows={1}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <RadioInput
+            label="tar/tar.gz"
+            value={tarOrTargz}
+            onChange={setTarOrTargz}
+            selections={
+              [
+                { label: 'tar', value: 'tar' },
+                { label: 'tar.gz', value: 'tar.gz' },
+              ]
+            }
+          />
+        </Grid>
+      </Grid>
     )
   }
 }
@@ -203,28 +212,28 @@ const portForwarding = {
     const textFieldRows = e2ee === 'openssl' ? 3 : 1;
 
     return (
-      <>
-        <TextFieldWithCopy
-          label="Server host"
-          value={serverHostCommand}
-          isVisible={opensslPassIsVisible}
-          rows={textFieldRows}
-          style={textFieldStyle}
-        />
-
-        <TextFieldWithCopy
-          label="Client host"
-          value={clientHostCommand}
-          isVisible={opensslPassIsVisible}
-          rows={textFieldRows}
-        />
-
-        <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
+      <Grid container spacing={textFieldContainerGridSpacing}>
+        <Grid item xs={12}>
+          <TextFieldWithCopy
+            label="Server host"
+            value={serverHostCommand}
+            isVisible={opensslPassIsVisible}
+            rows={textFieldRows}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextFieldWithCopy
+            label="Client host"
+            value={clientHostCommand}
+            isVisible={opensslPassIsVisible}
+            rows={textFieldRows}
+          />
+        </Grid>
+        <Grid item xs={12}>
           <TextField label="server host port" type="number" value={serverHostPort} onChange={(e) => setServerHostPort(e.target.value)}/>
           <TextField label="client host port" type="number" value={clientHostPort} onChange={(e) => setClientHostPort(e.target.value)}/>
-        </div>
-
-        <div>
+        </Grid>
+        <Grid item xs={12}>
           <RadioInput
             style={{marginRight: '1rem'}}
             label="client host serving"
@@ -267,8 +276,8 @@ const portForwarding = {
             </>
             : undefined
           }
-        </div>
-      </>
+        </Grid>
+      </Grid>
     )
   }
 };
@@ -312,26 +321,26 @@ const e2eePortForwarding = {
     ].join(' | ');
 
     return (
-      <>
-        <TextFieldWithCopy
-          label="Server host"
-          value={serverHostCommand}
-          rows={3}
-          style={textFieldStyle}
-        />
-
-        <TextFieldWithCopy
-          label="Client host"
-          value={clientHostCommand}
-          rows={3}
-        />
-
-        <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
+      <Grid container spacing={textFieldContainerGridSpacing}>
+        <Grid item xs={12}>
+          <TextFieldWithCopy
+            label="Server host"
+            value={serverHostCommand}
+            rows={3}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextFieldWithCopy
+            label="Client host"
+            value={clientHostCommand}
+            rows={3}
+          />
+        </Grid>
+        <Grid item xs={12}>
           <TextField label="server host port" type="number" value={serverHostPort} onChange={(e) => setServerHostPort(e.target.value)}/>
           <TextField label="client host port" type="number" value={clientHostPort} onChange={(e) => setClientHostPort(e.target.value)}/>
-        </div>
-
-        <div>
+        </Grid>
+        <Grid item xs={12}>
           <RadioInput
             style={{marginRight: '1rem'}}
             label="client host serving"
@@ -345,8 +354,8 @@ const e2eePortForwarding = {
               ]
             }
           />
-        </div>
-      </>
+        </Grid>
+      </Grid>
     )
   }
 };
