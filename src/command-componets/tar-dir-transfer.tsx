@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useState} from "react";
 import urlJoin from "url-join";
-import {Grid} from "@material-ui/core";
+import Grid from '@material-ui/core/Grid';
 import {TextFieldWithCopy} from "@/TextFieldWithCopy";
 import {RadioInput} from "@/RadioInput";
 import {textFieldContainerGridSpacing} from "./share";

@@ -1,7 +1,12 @@
 import * as React from "react";
 import {useState} from "react";
 import clipboardCopy from "clipboard-copy";
-import {FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput, Tooltip} from "@material-ui/core";
+import FormControl from '@material-ui/core/FormControl';
+import IconButton from '@material-ui/core/IconButton';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import InputLabel from '@material-ui/core/InputLabel';
+import OutlinedInput from '@material-ui/core/OutlinedInput';
+import Tooltip from '@material-ui/core/Tooltip';
 import FileCopyIcon from "@material-ui/icons/FileCopy";
 
 export function TextFieldWithCopy(props: {label: string, value: string, isVisible?: boolean, rows: number, style?: React.CSSProperties}) {

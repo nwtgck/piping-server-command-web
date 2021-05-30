@@ -1,5 +1,9 @@
 import * as React from "react";
-import {FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@material-ui/core";
+import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormLabel from '@material-ui/core/FormLabel';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 
 export function RadioInput<T extends string>(props: { value: T, onChange: (v: T) => void, label: string, style?: React.CSSProperties, selections: readonly {value: T, label: string}[]}) {
   return (
