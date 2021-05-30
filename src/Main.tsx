@@ -147,7 +147,7 @@ function generatePassword(passwordLen: number): string {
 
 const portForwarding = {
   title: 'Port forwarding',
-  searchTags: ['tunnel'],
+  searchTags: ['tunnel', 'e2ee', 'end-to-end', 'encryption'],
   component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
     // NOTE: ports are string because number does not allow empty input
     const [serverHostPort, setServerHostPort] = useState('22');
@@ -274,6 +274,84 @@ const portForwarding = {
   }
 };
 
+// split components and a little duplicate because easy to access to this command sheet
+const e2eePortForwarding = {
+  title: 'Port forwarding (E2EE inputting pass)',
+  searchTags: ['tunnel', 'e2ee', 'end-to-end', 'encryption'],
+  component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
+    // NOTE: ports are string because number does not allow empty input
+    const [serverHostPort, setServerHostPort] = useState('22');
+    const [clientHostPort, setClientHostPort] = useState('1022');
+    // NOTE: nc -lp should be default because BSD nc emits an error when using `nc -lp`, but GNU nc has no error when using `nc -l` for noticing users proper command.
+    const [clientHostServe, setClientHostServe] = useState<'nc -l' | 'nc -lp' | 'socat'>('nc -lp');
+
+    const encryptCommand = `stdbuf -i0 -o0 openssl aes-256-ctr -pass "pass:$pass" -bufsize 1 -pbkdf2`;
+    const decryptCommand = `stdbuf -i0 -o0 openssl aes-256-ctr -d -pass "pass:$pass" -bufsize 1 -pbkdf2`;
+    const serverHostCommand = [
+      `read -p "password: " -s pass && curl -sSN ${urlJoin(pipingServerUrl, "aaa")}`,
+      decryptCommand,
+      `nc localhost ${serverHostPort}`,
+      encryptCommand,
+      `curl -sSNT - ${urlJoin(pipingServerUrl, "bbb")}`
+    ].join(' | ');
+
+    const clientHostServeCommand = (() => {
+      switch (clientHostServe) {
+        case 'nc -l':
+        case 'nc -lp':
+          return `${clientHostServe} ${clientHostPort}`;
+        case 'socat':
+          return `socat TCP-LISTEN:${clientHostPort} -`;
+      }
+    })();
+    const clientHostCommand = [
+      `read -p "password: " -s pass &&  curl -NsS ${urlJoin(pipingServerUrl, "bbb")}`,
+      decryptCommand,
+      clientHostServeCommand,
+      encryptCommand,
+      `curl -NsST - ${urlJoin(pipingServerUrl, "aaa")}`
+    ].join(' | ');
+
+    return (
+      <>
+        <TextFieldWithCopy
+          label="Server host"
+          value={serverHostCommand}
+          rows={3}
+          style={textFieldStyle}
+        />
+
+        <TextFieldWithCopy
+          label="Client host"
+          value={clientHostCommand}
+          rows={3}
+        />
+
+        <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
+          <TextField label="server host port" type="number" value={serverHostPort} onChange={(e) => setServerHostPort(e.target.value)}/>
+          <TextField label="client host port" type="number" value={clientHostPort} onChange={(e) => setClientHostPort(e.target.value)}/>
+        </div>
+
+        <div>
+          <RadioInput
+            style={{marginRight: '1rem'}}
+            label="client host serving"
+            value={clientHostServe}
+            onChange={setClientHostServe}
+            selections={
+              [
+                { label: 'GNU: nc -lp', value: 'nc -lp' },
+                { label: 'BSD: nc -l', value: 'nc -l' },
+                { label: 'socat', value: 'socat' },
+              ]
+            }
+          />
+        </div>
+      </>
+    )
+  }
+};
+
 type TitleComponent = { title: string, searchTags: string[], element: JSX.Element };
 
 function toTitledComponent<Props>({title, searchTags, component}: { title: string, searchTags: string[], component: (props: Props) => JSX.Element }, props: Props): TitleComponent {
@@ -330,6 +408,7 @@ export function Main() {
     toTitledComponent(tarDirTransfer, {pipingServerUrl}),
     toTitledComponent(zipDirTransfer, {pipingServerUrl}),
     toTitledComponent(portForwarding, {pipingServerUrl}),
+    toTitledComponent(e2eePortForwarding, {pipingServerUrl}),
   ];
 
   const searches = ({title, searchTags}: TitleComponent): boolean => {
