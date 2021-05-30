@@ -1,11 +1,11 @@
 import * as React from 'react';
 import {
-  FormControl, FormControlLabel, FormLabel,
+  FormControl,
   IconButton,
   InputAdornment,
   InputLabel,
   OutlinedInput,
-  Paper, Radio, RadioGroup,
+  Paper,
   TextField,
   Typography
 } from '@material-ui/core';
@@ -14,6 +14,7 @@ import ClearIcon from '@material-ui/icons/Clear';
 import {useState} from "react";
 import urlJoin from "url-join";
 import {TextFieldWithCopy} from "./TextFieldWithCopy";
+import {RadioInput} from "./RadioInput";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 
@@ -100,18 +101,10 @@ const tarDirTransfer = {
   searchTags: ['folder', 'tar.gz', 'gzip'],
   component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
     const [tarOrTargz, setTarOrTargz] = useState<'tar' | "tar.gz">('tar');
-    function onChangeTarOrTargz(s: string) {
-      switch (s) {
-        case 'tar':
-        case 'tar.gz':
-          setTarOrTargz(s);
-        default:
-          throw new Error(`unexpected type: ${s}`);
-      }
-    }
 
     const senderCommand = `tar ${tarOrTargz === 'tar' ? 'c' : 'cz'} . | curl -T - ${urlJoin(pipingServerUrl, `mydir.${tarOrTargz}`)}`;
     const receiverCommand = `curl ${urlJoin(pipingServerUrl, `mydir.${tarOrTargz}`)} | tar x`;
+
     return (
       <>
         <TextFieldWithCopy
@@ -127,13 +120,18 @@ const tarDirTransfer = {
           rows={1}
         />
 
-        <FormControl style={{marginTop: '1rem'}}>
-          <FormLabel>tar/tar.gz</FormLabel>
-          <RadioGroup row aria-label="position" name="position" value={tarOrTargz} onChange={(e) => onChangeTarOrTargz(e.target.value)}>
-            <FormControlLabel value="tar" control={<Radio color="primary" />} label="tar" />
-            <FormControlLabel value="tar.gz" control={<Radio color="primary" />} label="tar.gz" />
-          </RadioGroup>
-        </FormControl>
+        <RadioInput
+          style={{marginTop: '1rem'}}
+          label="tar/tar.gz"
+          value={tarOrTargz}
+          onChange={setTarOrTargz}
+          selections={
+            [
+              { label: 'tar', value: 'tar' },
+              { label: 'tar.gz', value: 'tar.gz' },
+            ]
+          }
+        />
       </>
     )
   }
@@ -159,30 +157,6 @@ const portForwarding = {
     const [e2ee, setE2ee] = useState<'none' | 'openssl'>('none');
     const [opensslPass, setOpensslPass] = useState(generatePassword(20));
     const [opensslPassIsVisible, setOpensslPassIsVisible] = useState(true);
-
-    function onChangeClientHostServe(s: string) {
-      switch (s) {
-        case 'nc -l':
-        case 'nc -lp':
-        case 'socat':
-          setClientHostServe(s);
-          break;
-        default:
-          throw new Error(`unexpected client host serve: ${s}`);
-      }
-    }
-
-    function onChangeE2ee(s: string) {
-      switch (s) {
-        case 'none':
-        case 'openssl':
-          setOpensslPassIsVisible(s !== 'openssl');
-          setE2ee(s);
-          break;
-        default:
-          throw new Error(`unexpected e2ee: ${s}`);
-      }
-    }
 
     const encryptIfNeed = (() => {
       switch (e2ee) {
@@ -252,22 +226,35 @@ const portForwarding = {
         </div>
 
         <div>
-          <FormControl style={{marginRight: '1rem'}}>
-            <FormLabel>client host serving</FormLabel>
-            <RadioGroup row aria-label="position" name="position" defaultValue="nc -l" value={clientHostServe} onChange={(e) => onChangeClientHostServe(e.target.value)}>
-              <FormControlLabel value="nc -lp" control={<Radio color="primary" />} label="GNU: nc -lp" />
-              <FormControlLabel value="nc -l" control={<Radio color="primary" />} label="BSD: nc -l" />
-              <FormControlLabel value="socat" control={<Radio color="primary" />} label="socat" />
-            </RadioGroup>
-          </FormControl>
+          <RadioInput
+            style={{marginRight: '1rem'}}
+            label="client host serving"
+            value={clientHostServe}
+            onChange={setClientHostServe}
+            selections={
+              [
+                { label: 'GNU: nc -lp', value: 'nc -lp' },
+                { label: 'BSD: nc -l', value: 'nc -l' },
+                { label: 'socat', value: 'socat' },
+              ]
+            }
+          />
 
-          <FormControl>
-            <FormLabel>E2E encryption</FormLabel>
-            <RadioGroup row aria-label="position" name="position" defaultValue="none" value={e2ee} onChange={(e) => onChangeE2ee(e.target.value)}>
-              <FormControlLabel value="none" control={<Radio color="primary" />} label="none" />
-              <FormControlLabel value="openssl" control={<Radio color="primary" />} label="openssl" />
-            </RadioGroup>
-          </FormControl>
+          <RadioInput
+            label="E2E encryption"
+            value={e2ee}
+            onChange={(v) => {
+              setOpensslPassIsVisible(v !== 'openssl');
+              setE2ee(v);
+            }}
+            selections={
+              [
+                { label: 'none', value: 'none' },
+                { label: 'openssl', value: 'openssl' },
+              ]
+            }
+          />
+
           { e2ee === "openssl" ?
             <>
               <TextField label="openssl pass" value={opensslPass} type={opensslPassIsVisible ? 'text' : 'password'} onChange={(e) => setOpensslPass(e.target.value)}/>
