@@ -9,6 +9,7 @@ import {
   TextField,
   Typography
 } from '@material-ui/core';
+import {Autocomplete} from '@material-ui/lab';
 import SearchIcon from '@material-ui/icons/Search';
 import ClearIcon from '@material-ui/icons/Clear';
 import {useState} from "react";
@@ -64,7 +65,14 @@ function parseHashAsQuery(): URLSearchParams {
 
 export function Main() {
   const keywordQueryParamName = 'q';
-  const [pipingServerUrl, setPipingServerUrl] = useState('https://ppng.io');
+  const pipingServerUrls = [
+    "https://ppng.io",
+    "https://piping.glitch.me",
+    "https://ppng.herokuapp.com",
+    "https://piping.nwtgck.repl.co",
+    "https://piping-47q675ro2guv.runkit.sh"
+  ];
+  const [pipingServerUrl, setPipingServerUrl] = useState(pipingServerUrls[0]);
   const [searchKeyword, setSearchKeyword] = useState(parseHashAsQuery().get(keywordQueryParamName) ?? '');
   const paperStyle = {padding: '1rem', marginBottom: '1.5rem'};
 
@@ -96,11 +104,21 @@ export function Main() {
   return (
     <div style={{padding: '2rem'}}>
       <Paper elevation={4} style={paperStyle}>
-        <TextField
-          label={"Piping Server"}
-          value={pipingServerUrl}
-          onChange={(e) => setPipingServerUrl(e.target.value)}
-          style={{width: '20rem'}}
+        {/* (base: https://material-ui.com/components/autocomplete/#free-solo) */}
+        <Autocomplete
+          freeSolo
+          inputValue={pipingServerUrl}
+          defaultValue={pipingServerUrl}
+          // TODO: better way
+          onChange={(e) => setPipingServerUrl((e.target as any).textContent)}
+          options={pipingServerUrls}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Piping Server"
+              onChange={(e) => setPipingServerUrl(e.target.value)}
+            />
+          )}
         />
       </Paper>
 
