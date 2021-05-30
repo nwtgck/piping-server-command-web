@@ -177,14 +177,14 @@ export const e2eePortForwarding = {
       `nc localhost ${serverHostPort}`,
       encryptCommand,
       `curl -sSNT - ${urlJoin(pipingServerUrl, `bbb${randomString}`)}`
-    ].join(' | ');
+    ].join(' | ') + "; unset pass";
     const clientHostCommand = [
       `read -p "password: " -s pass &&  curl -NsS ${urlJoin(pipingServerUrl, `bbb${randomString}`)}`,
       decryptCommand,
       getClientHostServeCommand(clientHostServe, clientHostPort),
       encryptCommand,
       `curl -NsST - ${urlJoin(pipingServerUrl, `aaa${randomString}`)}`
-    ].join(' | ');
+    ].join(' | ') + "; unset pass";
 
     return (
       <Grid container spacing={textFieldContainerGridSpacing}>
