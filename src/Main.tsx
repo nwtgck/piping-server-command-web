@@ -74,7 +74,7 @@ const zipDirTransfer = {
   title: 'Directory transfer (zip)',
   searchTags: ['folder'],
   component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
-    const senderCommand = `zip -r - ./mydir | curl -T - ${urlJoin(pipingServerUrl, "mydir.zip")}`;
+    const senderCommand = `zip -r - . | curl -T - ${urlJoin(pipingServerUrl, "mydir.zip")}`;
     const receiverCommand = `curl ${urlJoin(pipingServerUrl, "mydir.zip")} > mydir.zip`; // TODO: extract
     return (
       <>
@@ -90,6 +90,50 @@ const zipDirTransfer = {
           value={receiverCommand}
           rows={1}
         />
+      </>
+    )
+  }
+}
+
+const tarDirTransfer = {
+  title: 'Directory transfer (tar)',
+  searchTags: ['folder', 'tar.gz', 'gzip'],
+  component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
+    const [tarOrTargz, setTarOrTargz] = useState<'tar' | "tar.gz">('tar');
+    function onChangeTarOrTargz(s: string) {
+      switch (s) {
+        case 'tar':
+        case 'tar.gz':
+          setTarOrTargz(s);
+        default:
+          throw new Error(`unexpected type: ${s}`);
+      }
+    }
+
+    const senderCommand = `tar ${tarOrTargz === 'tar' ? 'c' : 'cz'} . | curl -T - ${urlJoin(pipingServerUrl, `mydir.${tarOrTargz}`)}`;
+    const receiverCommand = `curl ${urlJoin(pipingServerUrl, `mydir.${tarOrTargz}`)} | tar x`;
+    return (
+      <>
+        <TextFieldWithCopy
+          label="Sender"
+          value={senderCommand}
+          rows={1}
+          style={textFieldStyle}
+        />
+
+        <TextFieldWithCopy
+          label="Receiver"
+          value={receiverCommand}
+          rows={1}
+        />
+
+        <FormControl style={{marginTop: '1rem'}}>
+          <FormLabel>tar/tar.gz</FormLabel>
+          <RadioGroup row aria-label="position" name="position" value={tarOrTargz} onChange={(e) => onChangeTarOrTargz(e.target.value)}>
+            <FormControlLabel value="tar" control={<Radio color="primary" />} label="tar" />
+            <FormControlLabel value="tar.gz" control={<Radio color="primary" />} label="tar.gz" />
+          </RadioGroup>
+        </FormControl>
       </>
     )
   }
@@ -295,6 +339,7 @@ export function Main() {
   const titleComponents: TitleComponent[] = [
     toTitledComponent(simpleFileTransfer, {pipingServerUrl}),
     toTitledComponent(clipboardTransfer, {pipingServerUrl}),
+    toTitledComponent(tarDirTransfer, {pipingServerUrl}),
     toTitledComponent(zipDirTransfer, {pipingServerUrl}),
     toTitledComponent(portForwarding, {pipingServerUrl}),
   ];
