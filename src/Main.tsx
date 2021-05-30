@@ -80,7 +80,12 @@ export function Main() {
   const [pipingServerUrl, setPipingServerUrl] = useState(pipingServerUrls[0]);
   const [randomString, setRandomString] = useState(generateRandomPathString());
   const [searchKeyword, setSearchKeyword] = useState(parseHashAsQuery().get(keywordQueryParamName) ?? '');
+  // NOTE: ports are string because number does not allow empty input
+  // NOTE: these states are shared between components
+  const serverHostPortState = useState('22');
+  const clientHostPortState = useState('1022');
   // NOTE: nc -lp should be default because BSD nc emits an error when using `nc -lp`, but GNU nc has no error when using `nc -l` for noticing users proper command.
+  // NOTE: this state is shared between components
   const clientHostServeState = useState<ClientHostServe>('nc -lp');
 
   const paperStyle = {padding: '1rem', marginBottom: '1.5rem'};
@@ -90,8 +95,8 @@ export function Main() {
     toTitledComponent(clipboardTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(tarDirTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(zipDirTransfer, {pipingServerUrl, randomString}),
-    toTitledComponent(portForwarding, {pipingServerUrl, randomString, clientHostServeState}),
-    toTitledComponent(e2eePortForwarding, {pipingServerUrl, randomString, clientHostServeState}),
+    toTitledComponent(portForwarding, {pipingServerUrl, randomString, clientHostServeState, serverHostPortState, clientHostPortState}),
+    toTitledComponent(e2eePortForwarding, {pipingServerUrl, randomString, clientHostServeState, serverHostPortState, clientHostPortState}),
   ];
 
   const searches = ({title, searchTags}: TitleComponent): boolean => {

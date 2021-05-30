@@ -34,10 +34,15 @@ function generatePassword(passwordLen: number): string {
 export const portForwarding = {
   title: 'Port forwarding',
   searchTags: ['tunnel', 'e2ee', 'end-to-end', 'encryption'],
-  component: ({pipingServerUrl, randomString, clientHostServeState}: {pipingServerUrl: string, randomString: string, clientHostServeState: ReactState<ClientHostServe>}) => {
-    // NOTE: ports are string because number does not allow empty input
-    const [serverHostPort, setServerHostPort] = useState('22');
-    const [clientHostPort, setClientHostPort] = useState('1022');
+  component: ({pipingServerUrl, randomString, clientHostServeState, serverHostPortState, clientHostPortState}: {
+    pipingServerUrl: string,
+    randomString: string,
+    clientHostServeState: ReactState<ClientHostServe>,
+    serverHostPortState: ReactState<string>,
+    clientHostPortState: ReactState<string>
+  }) => {
+    const [serverHostPort, setServerHostPort] = serverHostPortState;
+    const [clientHostPort, setClientHostPort] = clientHostPortState;
     const [clientHostServe, setClientHostServe] = clientHostServeState;
     const [e2ee, setE2ee] = useState<'none' | 'openssl'>('none');
     const [opensslPass, setOpensslPass] = useState(generatePassword(20));
@@ -153,10 +158,15 @@ export const portForwarding = {
 export const e2eePortForwarding = {
   title: 'Port forwarding (E2EE inputting pass)',
   searchTags: ['tunnel', 'e2ee', 'end-to-end', 'encryption'],
-  component: ({pipingServerUrl, randomString, clientHostServeState}: {pipingServerUrl: string, randomString: string, clientHostServeState: ReactState<ClientHostServe>}) => {
-    // NOTE: ports are string because number does not allow empty input
-    const [serverHostPort, setServerHostPort] = useState('22');
-    const [clientHostPort, setClientHostPort] = useState('1022');
+  component: ({pipingServerUrl, randomString, clientHostServeState, serverHostPortState, clientHostPortState}: {
+    pipingServerUrl: string,
+    randomString: string,
+    clientHostServeState: ReactState<ClientHostServe>,
+    serverHostPortState: ReactState<string>,
+    clientHostPortState: ReactState<string>
+  }) => {
+    const [serverHostPort, setServerHostPort] = serverHostPortState;
+    const [clientHostPort, setClientHostPort] = clientHostPortState;
     const [clientHostServe, setClientHostServe] = clientHostServeState;
 
     const encryptCommand = `stdbuf -i0 -o0 openssl aes-256-ctr -pass "pass:$pass" -bufsize 1 -pbkdf2`;
