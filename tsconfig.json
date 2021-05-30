@@ -6,5 +6,11 @@
     "module": "commonjs",
     "jsx"   : "react",
     "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    }
   }
 }

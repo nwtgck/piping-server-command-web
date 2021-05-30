@@ -1,5 +1,6 @@
-const path              = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path                = require('path');
+const HtmlWebpackPlugin   = require('html-webpack-plugin');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 const srcPath   = path.resolve(__dirname, 'src');
 const buildPath = path.resolve(__dirname, 'dist');
@@ -28,7 +29,8 @@ module.exports = {
   },
 
   resolve: {
-    extensions: ['*', '.js', '.jsx', '.ts', '.tsx']
+    extensions: ['*', '.js', '.jsx', '.ts', '.tsx'],
+    plugins: [new TsconfigPathsPlugin()] // To import "@/"
   },
 
   plugins: [

@@ -1,7 +1,7 @@
 import * as React from "react";
 import urlJoin from "url-join";
 import {Grid} from "@material-ui/core";
-import {TextFieldWithCopy} from "../TextFieldWithCopy";
+import {TextFieldWithCopy} from "@/TextFieldWithCopy";
 import {textFieldContainerGridSpacing} from "./share";
 
 export const zipDirTransfer = {
