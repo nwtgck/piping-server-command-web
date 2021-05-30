@@ -18,7 +18,6 @@ import {RadioInput} from "./RadioInput";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 
-const paperStyle = {padding: '1rem', marginBottom: '1.5rem'};
 const textFieldStyle = {marginBottom: '1.5rem'};
 
 const simpleFileTransfer = {
@@ -400,6 +399,7 @@ export function Main() {
   const keywordQueryParamName = 'q';
   const [pipingServerUrl, setPipingServerUrl] = useState('https://ppng.io');
   const [searchKeyword, setSearchKeyword] = useState(parseHashAsQuery().get(keywordQueryParamName) ?? '');
+  const paperStyle = {padding: '1rem', marginBottom: '1.5rem'};
 
   // NOTE: currently all props need the same props, but in the future, they may need different ones
   const titleComponents: TitleComponent[] = [
