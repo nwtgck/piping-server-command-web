@@ -7,9 +7,9 @@ import {textFieldContainerGridSpacing} from "./share";
 export const clipboardTransfer = {
   title: 'Copy & Paste (macOS)',
   searchTags: ['clipboard'],
-  component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
-    const senderCommand = `pbpaste | curl -T - ${urlJoin(pipingServerUrl, "clip")}`;
-    const receiverCommand = `curl ${urlJoin(pipingServerUrl, "clip")} | pbcopy`;
+  component: ({pipingServerUrl, randomString}: {pipingServerUrl: string, randomString: string}) => {
+    const senderCommand = `pbpaste | curl -T - ${urlJoin(pipingServerUrl, `clip${randomString}`)}`;
+    const receiverCommand = `curl ${urlJoin(pipingServerUrl, `clip${randomString}`)} | pbcopy`;
     return (
       <Grid container spacing={textFieldContainerGridSpacing}>
         <Grid item xs={12}>

@@ -22,7 +22,7 @@ function generatePassword(passwordLen: number): string {
 export const portForwarding = {
   title: 'Port forwarding',
   searchTags: ['tunnel', 'e2ee', 'end-to-end', 'encryption'],
-  component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
+  component: ({pipingServerUrl, randomString}: {pipingServerUrl: string, randomString: string}) => {
     // NOTE: ports are string because number does not allow empty input
     const [serverHostPort, setServerHostPort] = useState('22');
     const [clientHostPort, setClientHostPort] = useState('1022');
@@ -51,11 +51,11 @@ export const portForwarding = {
     })();
 
     const serverHostCommand = [
-      `curl -sSN ${urlJoin(pipingServerUrl, "aaa")}`,
+      `curl -sSN ${urlJoin(pipingServerUrl, `aaa${randomString}`)}`,
       ...decryptIfNeed,
       `nc localhost ${serverHostPort}`,
       ...encryptIfNeed,
-      `curl -sSNT - ${urlJoin(pipingServerUrl, "bbb")}`
+      `curl -sSNT - ${urlJoin(pipingServerUrl, `bbb${randomString}`)}`
     ].join(' | ');
 
     const clientHostServeCommand = (() => {
@@ -68,11 +68,11 @@ export const portForwarding = {
       }
     })();
     const clientHostCommand = [
-      `curl -NsS ${urlJoin(pipingServerUrl, "bbb")}`,
+      `curl -NsS ${urlJoin(pipingServerUrl, `bbb${randomString}`)}`,
       ...decryptIfNeed,
       clientHostServeCommand,
       ...encryptIfNeed,
-      `curl -NsST - ${urlJoin(pipingServerUrl, "aaa")}`
+      `curl -NsST - ${urlJoin(pipingServerUrl, `aaa${randomString}`)}`
     ].join(' | ');
 
     const textFieldRows = e2ee === 'openssl' ? 3 : 1;
@@ -152,7 +152,7 @@ export const portForwarding = {
 export const e2eePortForwarding = {
   title: 'Port forwarding (E2EE inputting pass)',
   searchTags: ['tunnel', 'e2ee', 'end-to-end', 'encryption'],
-  component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
+  component: ({pipingServerUrl, randomString}: {pipingServerUrl: string, randomString: string}) => {
     // NOTE: ports are string because number does not allow empty input
     const [serverHostPort, setServerHostPort] = useState('22');
     const [clientHostPort, setClientHostPort] = useState('1022');
@@ -162,11 +162,11 @@ export const e2eePortForwarding = {
     const encryptCommand = `stdbuf -i0 -o0 openssl aes-256-ctr -pass "pass:$pass" -bufsize 1 -pbkdf2`;
     const decryptCommand = `stdbuf -i0 -o0 openssl aes-256-ctr -d -pass "pass:$pass" -bufsize 1 -pbkdf2`;
     const serverHostCommand = [
-      `read -p "password: " -s pass && curl -sSN ${urlJoin(pipingServerUrl, "aaa")}`,
+      `read -p "password: " -s pass && curl -sSN ${urlJoin(pipingServerUrl, `aaa${randomString}`)}`,
       decryptCommand,
       `nc localhost ${serverHostPort}`,
       encryptCommand,
-      `curl -sSNT - ${urlJoin(pipingServerUrl, "bbb")}`
+      `curl -sSNT - ${urlJoin(pipingServerUrl, `bbb${randomString}`)}`
     ].join(' | ');
 
     const clientHostServeCommand = (() => {
@@ -179,11 +179,11 @@ export const e2eePortForwarding = {
       }
     })();
     const clientHostCommand = [
-      `read -p "password: " -s pass &&  curl -NsS ${urlJoin(pipingServerUrl, "bbb")}`,
+      `read -p "password: " -s pass &&  curl -NsS ${urlJoin(pipingServerUrl, `bbb${randomString}`)}`,
       decryptCommand,
       clientHostServeCommand,
       encryptCommand,
-      `curl -NsST - ${urlJoin(pipingServerUrl, "aaa")}`
+      `curl -NsST - ${urlJoin(pipingServerUrl, `aaa${randomString}`)}`
     ].join(' | ');
 
     return (

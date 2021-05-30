@@ -9,11 +9,11 @@ import {textFieldContainerGridSpacing} from "./share";
 export const tarDirTransfer = {
   title: 'Directory transfer (tar)',
   searchTags: ['folder', 'tar.gz', 'gzip'],
-  component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
+  component: ({pipingServerUrl, randomString}: {pipingServerUrl: string, randomString: string}) => {
     const [tarOrTargz, setTarOrTargz] = useState<'tar' | "tar.gz">('tar');
 
-    const senderCommand = `tar ${tarOrTargz === 'tar' ? 'c' : 'cz'} . | curl -T - ${urlJoin(pipingServerUrl, `mydir.${tarOrTargz}`)}`;
-    const receiverCommand = `curl ${urlJoin(pipingServerUrl, `mydir.${tarOrTargz}`)} | tar x`;
+    const senderCommand = `tar ${tarOrTargz === 'tar' ? 'c' : 'cz'} . | curl -T - ${urlJoin(pipingServerUrl, `mydir${randomString}.${tarOrTargz}`)}`;
+    const receiverCommand = `curl ${urlJoin(pipingServerUrl, `mydir${randomString}.${tarOrTargz}`)} | tar x`;
 
     return (
       <Grid container spacing={textFieldContainerGridSpacing}>

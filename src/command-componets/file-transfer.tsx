@@ -7,9 +7,9 @@ import {textFieldContainerGridSpacing} from "./share";
 export const fileTransfer = {
   title: 'File transfer',
   searchTags: [],
-  component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
-    const senderCommand = `curl -T myfile ${urlJoin(pipingServerUrl, "myfile")}`;
-    const receiverCommand = `curl ${urlJoin(pipingServerUrl, "myfile")} > myfile`;
+  component: ({pipingServerUrl, randomString}: {pipingServerUrl: string, randomString: string}) => {
+    const senderCommand = `curl -T myfile ${urlJoin(pipingServerUrl, `myfile${randomString}`)}`;
+    const receiverCommand = `curl ${urlJoin(pipingServerUrl, `myfile${randomString}`)} > myfile`;
     return (
       <Grid container spacing={textFieldContainerGridSpacing}>
         <Grid item xs={12}>

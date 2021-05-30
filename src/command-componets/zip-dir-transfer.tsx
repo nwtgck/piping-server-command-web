@@ -7,9 +7,9 @@ import {textFieldContainerGridSpacing} from "./share";
 export const zipDirTransfer = {
   title: 'Directory transfer (zip)',
   searchTags: ['folder'],
-  component: ({pipingServerUrl}: {pipingServerUrl: string}) => {
-    const senderCommand = `zip -r - . | curl -T - ${urlJoin(pipingServerUrl, "mydir.zip")}`;
-    const receiverCommand = `curl ${urlJoin(pipingServerUrl, "mydir.zip")} > mydir.zip`; // TODO: extract
+  component: ({pipingServerUrl, randomString}: {pipingServerUrl: string, randomString: string}) => {
+    const senderCommand = `zip -r - . | curl -T - ${urlJoin(pipingServerUrl, `mydir${randomString}.zip`)}`;
+    const receiverCommand = `curl ${urlJoin(pipingServerUrl, `mydir${randomString}.zip`)} > mydir.zip`; // TODO: extract
     return (
       <Grid container spacing={textFieldContainerGridSpacing}>
         <Grid item xs={12}>

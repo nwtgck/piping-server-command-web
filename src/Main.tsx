@@ -7,6 +7,7 @@ import OutlinedInput from '@material-ui/core/OutlinedInput';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
 import {Autocomplete} from '@material-ui/lab';
 import SearchIcon from '@material-ui/icons/Search';
 import ClearIcon from '@material-ui/icons/Clear';
@@ -61,6 +62,12 @@ function parseHashAsQuery(): URLSearchParams {
   return url.searchParams;
 }
 
+function generateRandomPathString(): string {
+  const numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+  const randomArr = window.crypto.getRandomValues(new Uint32Array(3));
+  return Array.from(randomArr).map(n => numbers[n % numbers.length]).join('');
+}
+
 export function Main() {
   const keywordQueryParamName = 'q';
   const pipingServerUrls = [
@@ -71,17 +78,18 @@ export function Main() {
     "https://piping-47q675ro2guv.runkit.sh"
   ];
   const [pipingServerUrl, setPipingServerUrl] = useState(pipingServerUrls[0]);
+  const [randomString, setRandomString] = useState(generateRandomPathString());
   const [searchKeyword, setSearchKeyword] = useState(parseHashAsQuery().get(keywordQueryParamName) ?? '');
   const paperStyle = {padding: '1rem', marginBottom: '1.5rem'};
 
   // NOTE: currently all props need the same props, but in the future, they may need different ones
   const titleComponents: TitleComponent[] = [
-    toTitledComponent(fileTransfer, {pipingServerUrl}),
-    toTitledComponent(clipboardTransfer, {pipingServerUrl}),
-    toTitledComponent(tarDirTransfer, {pipingServerUrl}),
-    toTitledComponent(zipDirTransfer, {pipingServerUrl}),
-    toTitledComponent(portForwarding, {pipingServerUrl}),
-    toTitledComponent(e2eePortForwarding, {pipingServerUrl}),
+    toTitledComponent(fileTransfer, {pipingServerUrl, randomString}),
+    toTitledComponent(clipboardTransfer, {pipingServerUrl, randomString}),
+    toTitledComponent(tarDirTransfer, {pipingServerUrl, randomString}),
+    toTitledComponent(zipDirTransfer, {pipingServerUrl, randomString}),
+    toTitledComponent(portForwarding, {pipingServerUrl, randomString}),
+    toTitledComponent(e2eePortForwarding, {pipingServerUrl, randomString}),
   ];
 
   const searches = ({title, searchTags}: TitleComponent): boolean => {
@@ -102,22 +110,34 @@ export function Main() {
   return (
     <div style={{padding: '2rem'}}>
       <Paper elevation={4} style={paperStyle}>
-        {/* (base: https://material-ui.com/components/autocomplete/#free-solo) */}
-        <Autocomplete
-          freeSolo
-          inputValue={pipingServerUrl}
-          defaultValue={pipingServerUrl}
-          // TODO: better way
-          onChange={(e) => setPipingServerUrl((e.target as any).textContent)}
-          options={pipingServerUrls}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Piping Server"
-              onChange={(e) => setPipingServerUrl(e.target.value)}
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            {/* (base: https://material-ui.com/components/autocomplete/#free-solo) */}
+            <Autocomplete
+              freeSolo
+              inputValue={pipingServerUrl}
+              defaultValue={pipingServerUrl}
+              // TODO: better way
+              onChange={(e) => setPipingServerUrl((e.target as any).textContent)}
+              options={pipingServerUrls}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Piping Server"
+                  onChange={(e) => setPipingServerUrl(e.target.value)}
+                />
+              )}
             />
-          )}
-        />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="random fragment"
+              value={randomString}
+              onChange={(e) => setRandomString(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+        </Grid>
       </Paper>
 
       <CommandSearch
