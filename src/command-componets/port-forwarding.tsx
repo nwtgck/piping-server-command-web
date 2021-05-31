@@ -9,7 +9,7 @@ import {RadioInput} from "@/RadioInput";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import {textFieldContainerGridSpacing} from "./share";
-import {ReactState} from "@/utils";
+import {ReactState, useWatchingUpdate} from "@/utils";
 
 export type ClientHostServe = 'nc -l' | 'nc -lp' | 'socat';
 
@@ -34,13 +34,16 @@ function generatePassword(passwordLen: number): string {
 export const portForwarding = {
   title: 'Port forwarding',
   searchTags: ['tunnel', 'e2ee', 'end-to-end', 'encryption'],
-  component: ({pipingServerUrl, randomString, clientHostServeState, serverHostPortState, clientHostPortState}: {
+  component: ({pipingServerUrl, path1State, path2State, clientHostServeState, serverHostPortState, clientHostPortState}: {
     pipingServerUrl: string,
-    randomString: string,
+    path1State: ReactState<string>,
+    path2State: ReactState<string>,
     clientHostServeState: ReactState<ClientHostServe>,
     serverHostPortState: ReactState<string>,
     clientHostPortState: ReactState<string>
   }) => {
+    const [path1, setPath1] = path1State;
+    const [path2, setPath2] = path2State;
     const [serverHostPort, setServerHostPort] = serverHostPortState;
     const [clientHostPort, setClientHostPort] = clientHostPortState;
     const [clientHostServe, setClientHostServe] = clientHostServeState;
@@ -67,18 +70,18 @@ export const portForwarding = {
     })();
 
     const serverHostCommand = [
-      `curl -sSN ${urlJoin(pipingServerUrl, `aaa${randomString}`)}`,
+      `curl -sSN ${urlJoin(pipingServerUrl, path1)}`,
       ...decryptIfNeed,
       `nc localhost ${serverHostPort}`,
       ...encryptIfNeed,
-      `curl -sSNT - ${urlJoin(pipingServerUrl, `bbb${randomString}`)}`
+      `curl -sSNT - ${urlJoin(pipingServerUrl, path2)}`
     ].join(' | ');
     const clientHostCommand = [
-      `curl -NsS ${urlJoin(pipingServerUrl, `bbb${randomString}`)}`,
+      `curl -NsS ${urlJoin(pipingServerUrl, path2)}`,
       ...decryptIfNeed,
       getClientHostServeCommand(clientHostServe, clientHostPort),
       ...encryptIfNeed,
-      `curl -NsST - ${urlJoin(pipingServerUrl, `aaa${randomString}`)}`
+      `curl -NsST - ${urlJoin(pipingServerUrl, path1)}`
     ].join(' | ');
 
     const textFieldRows = e2ee === 'openssl' ? 3 : 1;
@@ -102,8 +105,11 @@ export const portForwarding = {
           />
         </Grid>
         <Grid item xs={12}>
-          <TextField label="server host port" type="number" value={serverHostPort} onChange={(e) => setServerHostPort(e.target.value)}/>
+          <TextField label="server host port" type="number" value={serverHostPort} onChange={(e) => setServerHostPort(e.target.value)} style={{marginRight: '0.5rem'}}/>
           <TextField label="client host port" type="number" value={clientHostPort} onChange={(e) => setClientHostPort(e.target.value)}/>
+          <span style={{marginRight: '1rem'}} />
+          <TextField label="path1" value={path1} onChange={(e) => setPath1(e.target.value)} style={{marginRight: '0.5rem'}}/>
+          <TextField label="path2" value={path2} onChange={(e) => setPath2(e.target.value)}/>
         </Grid>
         <Grid item xs={12}>
           <RadioInput
@@ -158,13 +164,16 @@ export const portForwarding = {
 export const e2eePortForwarding = {
   title: 'Port forwarding (E2EE inputting pass)',
   searchTags: ['tunnel', 'e2ee', 'end-to-end', 'encryption'],
-  component: ({pipingServerUrl, randomString, clientHostServeState, serverHostPortState, clientHostPortState}: {
+  component: ({pipingServerUrl, path1State, path2State, clientHostServeState, serverHostPortState, clientHostPortState}: {
     pipingServerUrl: string,
-    randomString: string,
+    path1State: ReactState<string>,
+    path2State: ReactState<string>,
     clientHostServeState: ReactState<ClientHostServe>,
     serverHostPortState: ReactState<string>,
     clientHostPortState: ReactState<string>
   }) => {
+    const [path1, setPath1] = path1State;
+    const [path2, setPath2] = path2State;
     const [serverHostPort, setServerHostPort] = serverHostPortState;
     const [clientHostPort, setClientHostPort] = clientHostPortState;
     const [clientHostServe, setClientHostServe] = clientHostServeState;
@@ -172,18 +181,18 @@ export const e2eePortForwarding = {
     const encryptCommand = `stdbuf -i0 -o0 openssl aes-256-ctr -pass "pass:$pass" -bufsize 1 -pbkdf2`;
     const decryptCommand = `stdbuf -i0 -o0 openssl aes-256-ctr -d -pass "pass:$pass" -bufsize 1 -pbkdf2`;
     const serverHostCommand = [
-      `read -p "password: " -s pass && curl -sSN ${urlJoin(pipingServerUrl, `aaa${randomString}`)}`,
+      `read -p "password: " -s pass && curl -sSN ${urlJoin(pipingServerUrl, path1)}`,
       decryptCommand,
       `nc localhost ${serverHostPort}`,
       encryptCommand,
-      `curl -sSNT - ${urlJoin(pipingServerUrl, `bbb${randomString}`)}`
+      `curl -sSNT - ${urlJoin(pipingServerUrl, path2)}`
     ].join(' | ') + "; unset pass";
     const clientHostCommand = [
-      `read -p "password: " -s pass &&  curl -NsS ${urlJoin(pipingServerUrl, `bbb${randomString}`)}`,
+      `read -p "password: " -s pass &&  curl -NsS ${urlJoin(pipingServerUrl, path2)}`,
       decryptCommand,
       getClientHostServeCommand(clientHostServe, clientHostPort),
       encryptCommand,
-      `curl -NsST - ${urlJoin(pipingServerUrl, `aaa${randomString}`)}`
+      `curl -NsST - ${urlJoin(pipingServerUrl, path1)}`
     ].join(' | ') + "; unset pass";
 
     return (
@@ -203,8 +212,11 @@ export const e2eePortForwarding = {
           />
         </Grid>
         <Grid item xs={12}>
-          <TextField label="server host port" type="number" value={serverHostPort} onChange={(e) => setServerHostPort(e.target.value)}/>
+          <TextField label="server host port" type="number" value={serverHostPort} onChange={(e) => setServerHostPort(e.target.value)} style={{marginRight: '0.5rem'}}/>
           <TextField label="client host port" type="number" value={clientHostPort} onChange={(e) => setClientHostPort(e.target.value)}/>
+          <span style={{marginRight: '1rem'}} />
+          <TextField label="path1" value={path1} onChange={(e) => setPath1(e.target.value)} style={{marginRight: '0.5rem'}}/>
+          <TextField label="path2" value={path2} onChange={(e) => setPath2(e.target.value)}/>
         </Grid>
         <Grid item xs={12}>
           <RadioInput

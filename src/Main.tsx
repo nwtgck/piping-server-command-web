@@ -17,6 +17,7 @@ import {clipboardTransfer} from "./command-componets/clipboard-transfer";
 import {zipDirTransfer} from "./command-componets/zip-dir-transfer";
 import {tarDirTransfer} from "./command-componets/tar-dir-transfer";
 import {ClientHostServe, e2eePortForwarding, portForwarding} from "./command-componets/port-forwarding";
+import {useWatchingUpdate} from "@/utils";
 
 type TitleComponent = { title: string, searchTags: string[], element: JSX.Element };
 
@@ -80,6 +81,12 @@ export function Main() {
   const [pipingServerUrl, setPipingServerUrl] = useState(pipingServerUrls[0]);
   const [randomString, setRandomString] = useState(generateRandomPathString());
   const [searchKeyword, setSearchKeyword] = useState(parseHashAsQuery().get(keywordQueryParamName) ?? '');
+  const portForwardPath1State = useWatchingUpdate(() => {
+    return `aaa${randomString}`;
+  }, [randomString]);
+  const portForwardPath2State = useWatchingUpdate(() => {
+    return `bbb${randomString}`;
+  }, [randomString]);
   // NOTE: ports are string because number does not allow empty input
   // NOTE: these states are shared between components
   const serverHostPortState = useState('22');
@@ -95,8 +102,8 @@ export function Main() {
     toTitledComponent(clipboardTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(tarDirTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(zipDirTransfer, {pipingServerUrl, randomString}),
-    toTitledComponent(portForwarding, {pipingServerUrl, randomString, clientHostServeState, serverHostPortState, clientHostPortState}),
-    toTitledComponent(e2eePortForwarding, {pipingServerUrl, randomString, clientHostServeState, serverHostPortState, clientHostPortState}),
+    toTitledComponent(portForwarding, {pipingServerUrl, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState}),
+    toTitledComponent(e2eePortForwarding, {pipingServerUrl, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState}),
   ];
 
   const searches = ({title, searchTags}: TitleComponent): boolean => {
