@@ -13,27 +13,46 @@ export const fileTransfer = {
     const [textFieldRows, setTextFieldRows] = useState(1);
     const [e2ee, setE2ee] = useState<'none' | 'openssl' | 'gpg'>('none');
     const [opensslCipherAlgorithm, setOpensslCipherAlgorithm] = useState('aes-256-cbc');
+    const [integrity, setIntegrity] = useState<'none' | 'shasum'>('none');
     const url = urlJoin(pipingServerUrl, `myfile${randomString}`);
     const filePath = `myfile`;
+    const integrityCommand = integrity === "none" ? [] : ["tee >(shasum >&2)"];
     const senderCommand = (() => {
-      switch (e2ee) {
-        case "none":
-          return `curl -T ${filePath} ${url}`;
-        case "openssl":
-          return `cat ${filePath} | openssl ${opensslCipherAlgorithm} -pbkdf2 | curl -T - ${url}`;
-        case "gpg":
-          return `export GPG_TTY=$(tty);\ncat ${filePath} | gpg -c | curl -T - ${url}`;
+      if (e2ee === "none" && integrity === "none") {
+        return `curl -T ${filePath} ${url}`;
       }
+      const e2eeEncryptCommand = (() => {
+        switch (e2ee) {
+          case "none": return [];
+          case "openssl": return [`openssl ${opensslCipherAlgorithm} -pbkdf2`];
+          case "gpg": return [`gpg -c`];
+        }
+      })();
+      const extra = e2ee === "gpg" ? `export GPG_TTY=$(tty);\n` : "";
+      return extra + [
+        `cat ${filePath}`,
+        ...e2eeEncryptCommand,
+        ...integrityCommand,
+        `curl -T - ${url}`,
+      ].join(" | ");
     })();
     const receiverCommand = (() => {
-      switch (e2ee) {
-        case "none":
-          return `curl ${url} > ${filePath}`;
-        case "openssl":
-          return `curl -sS ${url} | openssl ${opensslCipherAlgorithm} -d -pbkdf2`;
-        case "gpg":
-          return `export GPG_TTY=$(tty);\ncurl -sS ${url} | gpg -d`;
+      if (e2ee === "none" && integrity === "none") {
+        return `curl ${url} > ${filePath}`;
       }
+      const e2eeDecryptCommand = (() => {
+        switch (e2ee) {
+          case "none": return [];
+          case "openssl": return [`openssl ${opensslCipherAlgorithm} -d -pbkdf2`];
+          case "gpg": return [`gpg -d`];
+        }
+      })();
+      const extra = e2ee === "gpg" ? `export GPG_TTY=$(tty);\n` : "";
+      return extra + [
+        `curl -sS ${url}`,
+        ...integrityCommand,
+        ...e2eeDecryptCommand,
+      ].join(" | ") + ` > ${filePath}`;
     })();
 
     return (
@@ -65,6 +84,18 @@ export const fileTransfer = {
                 { label: 'none', value: 'none' },
                 { label: 'openssl', value: 'openssl' },
                 { label: 'gpg', value: 'gpg' },
+              ]
+            }
+            style={{marginRight: '1rem'}}
+          />
+          <RadioInput
+            label="Integrity"
+            value={integrity}
+            onChange={setIntegrity}
+            selections={
+              [
+                { label: 'none', value: 'none' },
+                { label: 'shasum', value: 'shasum' },
               ]
             }
           />
