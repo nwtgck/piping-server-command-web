@@ -81,6 +81,8 @@ export function Main() {
   const [pipingServerUrl, setPipingServerUrl] = useState(pipingServerUrls[0]);
   const [randomString, setRandomString] = useState(generateRandomPathString());
   const [searchKeyword, setSearchKeyword] = useState(parseHashAsQuery().get(keywordQueryParamName) ?? '');
+  const fileTransferIntegrityState = useState<'none' | 'shasum'>('none');
+  const fileTransferUsesPvState = useState(false);
   const portForwardPath1State = useWatchingUpdate(() => {
     return `aaa${randomString}`;
   }, [randomString]);
@@ -98,8 +100,8 @@ export function Main() {
   const paperStyle = {padding: '1rem', marginBottom: '1.5rem'};
 
   const titleComponents: TitleComponent[] = [
-    toTitledComponent(fileTransfer, {pipingServerUrl, randomString}),
-    toTitledComponent(e2eeFileTransfer, {pipingServerUrl, randomString}),
+    toTitledComponent(fileTransfer, {pipingServerUrl, randomString, integrityState: fileTransferIntegrityState, usesPvState: fileTransferUsesPvState}),
+    toTitledComponent(e2eeFileTransfer, {pipingServerUrl, randomString, integrityState: fileTransferIntegrityState, usesPvState: fileTransferUsesPvState}),
     toTitledComponent(clipboardTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(tarDirTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(zipDirTransfer, {pipingServerUrl, randomString}),

@@ -10,13 +10,14 @@ import FormLabel from "@material-ui/core/FormLabel";
 import {TextFieldWithCopy} from "@/TextFieldWithCopy";
 import {textFieldContainerGridSpacing} from "./share";
 import {RadioInput} from "@/RadioInput";
+import {ReactState} from "@/utils";
 
 export const fileTransfer = {
   title: 'File transfer',
   searchTags: [],
-  component: ({pipingServerUrl, randomString}: {pipingServerUrl: string, randomString: string}) => {
-    const [integrity, setIntegrity] = useState<'none' | 'shasum'>('none');
-    const [usesPv, setUsesPv] = useState(false);
+  component: ({pipingServerUrl, randomString, integrityState, usesPvState}: {pipingServerUrl: string, randomString: string, integrityState: ReactState<'none' | 'shasum'>, usesPvState: ReactState<boolean>}) => {
+    const [integrity, setIntegrity] = integrityState;
+    const [usesPv, setUsesPv] = usesPvState;
     const url = urlJoin(pipingServerUrl, `myfile${randomString}`);
     const filePath = `myfile`;
     const integrityCommand = integrity === "none" ? [] : ["tee >(shasum >&2)"];
@@ -93,14 +94,14 @@ export const fileTransfer = {
 
 
 export const e2eeFileTransfer = {
-  title: 'File transfer (end-to-end encryption)',
+  title: 'File transfer with end-to-end encryption',
   searchTags: ['e2ee', 'e2e encryption'],
-  component: ({pipingServerUrl, randomString}: {pipingServerUrl: string, randomString: string}) => {
+  component: ({pipingServerUrl, randomString, integrityState, usesPvState}: {pipingServerUrl: string, randomString: string, integrityState: ReactState<'none' | 'shasum'>, usesPvState: ReactState<boolean>}) => {
     const [textFieldRows, setTextFieldRows] = useState(1);
     const [e2ee, setE2ee] = useState<'openssl' | 'gpg'>('openssl');
     const [opensslCipherAlgorithm, setOpensslCipherAlgorithm] = useState('aes-256-cbc');
-    const [integrity, setIntegrity] = useState<'none' | 'shasum'>('none');
-    const [usesPv, setUsesPv] = useState(false);
+    const [integrity, setIntegrity] = integrityState;
+    const [usesPv, setUsesPv] = usesPvState;
     const url = urlJoin(pipingServerUrl, `myfile${randomString}`);
     const filePath = `myfile`;
     const integrityCommand = integrity === "none" ? [] : ["tee >(shasum >&2)"];
