@@ -2,6 +2,11 @@ import * as React from "react";
 import {useState} from "react";
 import urlJoin from "url-join";
 import Grid from "@material-ui/core/Grid";
+import Checkbox from "@material-ui/core/Checkbox";
+import FormControl from "@material-ui/core/FormControl";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormGroup from "@material-ui/core/FormGroup";
+import FormLabel from "@material-ui/core/FormLabel";
 import {TextFieldWithCopy} from "@/TextFieldWithCopy";
 import {textFieldContainerGridSpacing} from "./share";
 import {RadioInput} from "@/RadioInput";
@@ -14,11 +19,12 @@ export const fileTransfer = {
     const [e2ee, setE2ee] = useState<'none' | 'openssl' | 'gpg'>('none');
     const [opensslCipherAlgorithm, setOpensslCipherAlgorithm] = useState('aes-256-cbc');
     const [integrity, setIntegrity] = useState<'none' | 'shasum'>('none');
+    const [usesPv, setUsesPv] = useState(false);
     const url = urlJoin(pipingServerUrl, `myfile${randomString}`);
     const filePath = `myfile`;
     const integrityCommand = integrity === "none" ? [] : ["tee >(shasum >&2)"];
     const senderCommand = (() => {
-      if (e2ee === "none" && integrity === "none") {
+      if (e2ee === "none" && integrity === "none" && !usesPv) {
         return `curl -T ${filePath} ${url}`;
       }
       const e2eeEncryptCommand = (() => {
@@ -29,8 +35,9 @@ export const fileTransfer = {
         }
       })();
       const extra = e2ee === "gpg" ? `export GPG_TTY=$(tty);\n` : "";
+      const catOrPv = usesPv ? "pv" : "cat";
       return extra + [
-        `cat ${filePath}`,
+        `${catOrPv} ${filePath}`,
         ...e2eeEncryptCommand,
         ...integrityCommand,
         `curl -T - ${url}`,
@@ -38,6 +45,7 @@ export const fileTransfer = {
     })();
     const receiverCommand = (() => {
       if (e2ee === "none" && integrity === "none") {
+        // NOTE: curl shows progress by default without "-sS"
         return `curl ${url} > ${filePath}`;
       }
       const e2eeDecryptCommand = (() => {
@@ -98,7 +106,22 @@ export const fileTransfer = {
                 { label: 'shasum', value: 'shasum' },
               ]
             }
+            style={{marginRight: '1rem'}}
           />
+
+          <FormControl component="fieldset" >
+            <FormLabel component="legend">Progress</FormLabel>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={usesPv}
+                    onChange={(e) => setUsesPv(e.target.checked)}
+                    color="primary"
+                  />}
+               label="progress with pv"/>
+            </FormGroup>
+          </FormControl>
         </Grid>
       </Grid>
     )
