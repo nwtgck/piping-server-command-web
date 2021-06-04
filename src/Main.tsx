@@ -12,7 +12,7 @@ import {Autocomplete} from '@material-ui/lab';
 import SearchIcon from '@material-ui/icons/Search';
 import ClearIcon from '@material-ui/icons/Clear';
 import {useState} from "react";
-import {fileTransfer} from "./command-componets/file-transfer";
+import {e2eeFileTransfer, fileTransfer} from "./command-componets/file-transfer";
 import {clipboardTransfer} from "./command-componets/clipboard-transfer";
 import {zipDirTransfer} from "./command-componets/zip-dir-transfer";
 import {tarDirTransfer} from "./command-componets/tar-dir-transfer";
@@ -99,6 +99,7 @@ export function Main() {
 
   const titleComponents: TitleComponent[] = [
     toTitledComponent(fileTransfer, {pipingServerUrl, randomString}),
+    toTitledComponent(e2eeFileTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(clipboardTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(tarDirTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(zipDirTransfer, {pipingServerUrl, randomString}),
