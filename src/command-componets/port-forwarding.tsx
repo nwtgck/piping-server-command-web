@@ -33,7 +33,7 @@ function generatePassword(passwordLen: number): string {
 
 export const portForwarding = {
   title: 'Port forwarding',
-  searchTags: ['tunnel', 'e2ee', 'end-to-end', 'encryption'],
+  searchTags: ['tunnel'],
   component: ({pipingServerUrl, path1State, path2State, clientHostServeState, serverHostPortState, clientHostPortState}: {
     pipingServerUrl: string,
     path1State: ReactState<string>,

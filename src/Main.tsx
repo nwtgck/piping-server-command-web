@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {useState} from 'react';
 import FormControl from '@material-ui/core/FormControl';
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -11,7 +12,6 @@ import Grid from '@material-ui/core/Grid';
 import {Autocomplete} from '@material-ui/lab';
 import SearchIcon from '@material-ui/icons/Search';
 import ClearIcon from '@material-ui/icons/Clear';
-import {useState} from "react";
 import {e2eeFileTransfer, fileTransfer} from "./command-componets/file-transfer";
 import {clipboardTransfer} from "./command-componets/clipboard-transfer";
 import {zipDirTransfer} from "./command-componets/zip-dir-transfer";
@@ -99,7 +99,7 @@ export function Main() {
 
   const paperStyle = {padding: '1rem', marginBottom: '1.5rem'};
 
-  const titleComponents: TitleComponent[] = [
+  const titleComponents: readonly TitleComponent[] = [
     toTitledComponent(fileTransfer, {pipingServerUrl, randomString, integrityState: fileTransferIntegrityState, usesPvState: fileTransferUsesPvState}),
     toTitledComponent(e2eeFileTransfer, {pipingServerUrl, randomString, integrityState: fileTransferIntegrityState, usesPvState: fileTransferUsesPvState}),
     toTitledComponent(clipboardTransfer, {pipingServerUrl, randomString}),
@@ -119,6 +119,28 @@ export function Main() {
       title.toLocaleLowerCase().search(keyword) !== -1 || searchTags.some(t => t.search(keyword) !== -1)
     );
   };
+  const getRelatedRank = ({title, searchTags}: TitleComponent): number => {
+    if (searchKeyword === '') {
+      return 0;
+    }
+    const titleSplits = title.toLocaleLowerCase().split(/\s+/).filter(s => s !== "");
+    function rank(splits: readonly string[], keyword: string): number {
+      return splits.reduce((s, t) => s + t.search(keyword) !== -1 ? 1 : 0, 0);
+    }
+    return searchKeyword.toLocaleLowerCase()
+      .split(/\s+/)
+      .filter(s => s !== "")
+      .reduce((s, keyword) => s + rank(titleSplits, keyword) * 2 + rank(searchTags, keyword), 0);
+  };
+  const searchedTitleComponents = (() => {
+    if (searchKeyword === '') {
+      return titleComponents;
+    }
+    return titleComponents.map(t => [t, getRelatedRank(t)] as const)
+      .filter(([, r]) => r !== 0)
+      .sort(([, r1], [, r2]) =>  r2 - r1)
+      .map(([t, ])  => t);
+  })();
 
   function onSearchKeywordChanged(keyword: string) {
     setSearchKeyword(keyword);
@@ -163,7 +185,7 @@ export function Main() {
         setSearchKeyword={onSearchKeywordChanged}
       />
 
-      { titleComponents.filter(searches).map((paper, idx) =>
+      { searchedTitleComponents.map((paper, idx) =>
         <Paper elevation={4} style={paperStyle} key={idx}>
           <Typography variant="h6" component="h4" style={{marginBottom: '1rem'}}>
             {paper.title}
