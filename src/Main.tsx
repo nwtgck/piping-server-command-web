@@ -15,7 +15,7 @@ import {useState} from "react";
 import {e2eeFileTransfer, fileTransfer} from "./command-componets/file-transfer";
 import {clipboardTransfer} from "./command-componets/clipboard-transfer";
 import {zipDirTransfer} from "./command-componets/zip-dir-transfer";
-import {tarDirTransfer} from "./command-componets/tar-dir-transfer";
+import {e2eeTarDirTransfer, tarDirTransfer} from "./command-componets/tar-dir-transfer";
 import {ClientHostServe, e2eePortForwarding, portForwarding} from "./command-componets/port-forwarding";
 import {useWatchingUpdate} from "@/utils";
 
@@ -104,6 +104,7 @@ export function Main() {
     toTitledComponent(e2eeFileTransfer, {pipingServerUrl, randomString, integrityState: fileTransferIntegrityState, usesPvState: fileTransferUsesPvState}),
     toTitledComponent(clipboardTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(tarDirTransfer, {pipingServerUrl, randomString}),
+    toTitledComponent(e2eeTarDirTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(zipDirTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(portForwarding, {pipingServerUrl, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState}),
     toTitledComponent(e2eePortForwarding, {pipingServerUrl, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState}),

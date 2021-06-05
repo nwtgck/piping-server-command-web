@@ -11,6 +11,7 @@ import {TextFieldWithCopy} from "@/TextFieldWithCopy";
 import {textFieldContainerGridSpacing} from "./share";
 import {RadioInput} from "@/RadioInput";
 import {ReactState} from "@/utils";
+import {generalE2eeCommandsAndElement} from "@/command-componets/e2ee";
 
 export const fileTransfer = {
   title: 'File transfer',
@@ -97,77 +98,49 @@ export const e2eeFileTransfer = {
   title: 'File transfer with end-to-end encryption',
   searchTags: ['e2ee', 'e2e encryption'],
   component: ({pipingServerUrl, randomString, integrityState, usesPvState}: {pipingServerUrl: string, randomString: string, integrityState: ReactState<'none' | 'shasum'>, usesPvState: ReactState<boolean>}) => {
-    const [textFieldRows, setTextFieldRows] = useState(1);
-    const [e2ee, setE2ee] = useState<'openssl' | 'gpg'>('openssl');
-    const [opensslCipherAlgorithm, setOpensslCipherAlgorithm] = useState('aes-256-cbc');
+    const {e2eePrepend, e2eeEncryptCommand, e2eeDecryptCommand, e2eeSelectionElement} = generalE2eeCommandsAndElement({
+      e2eeState: useState<'openssl' | 'gpg'>('openssl'),
+      opensslCipherAlgorithmState: useState('aes-256-cbc')
+    });
     const [integrity, setIntegrity] = integrityState;
     const [usesPv, setUsesPv] = usesPvState;
     const url = urlJoin(pipingServerUrl, `myfile${randomString}`);
     const filePath = `myfile`;
     const integrityCommand = integrity === "none" ? [] : ["tee >(shasum >&2)"];
     const senderCommand = (() => {
-      const e2eeEncryptCommand = (() => {
-        switch (e2ee) {
-          case "openssl": return [`openssl ${opensslCipherAlgorithm} -pbkdf2`];
-          case "gpg": return [`gpg -c`];
-        }
-      })();
-      const extra = e2ee === "gpg" ? `export GPG_TTY=$(tty);\n` : "";
       const catOrPv = usesPv ? "pv" : "cat";
-      return extra + [
+      return e2eePrepend + [
         `${catOrPv} ${filePath}`,
-        ...e2eeEncryptCommand,
+        e2eeEncryptCommand,
         ...integrityCommand,
         `curl -T - ${url}`,
       ].join(" | ");
     })();
     const receiverCommand = (() => {
-      const e2eeDecryptCommand = (() => {
-        switch (e2ee) {
-          case "openssl": return `openssl ${opensslCipherAlgorithm} -d -pbkdf2`;
-          case "gpg": return `gpg -d`;
-        }
-      })();
-      const extra = e2ee === "gpg" ? `export GPG_TTY=$(tty);\n` : "";
-      return extra + [
+      return e2eePrepend + [
         `curl -sS ${url}`,
         ...integrityCommand,
         e2eeDecryptCommand,
       ].join(" | ") + ` > ${filePath}`;
     })();
-
     return (
       <Grid container spacing={textFieldContainerGridSpacing}>
         <Grid item xs={12}>
           <TextFieldWithCopy
             label="Sender"
             value={senderCommand}
-            rows={textFieldRows}
+            rows={senderCommand.split("\n").length}
           />
         </Grid>
         <Grid item xs={12}>
           <TextFieldWithCopy
             label="Receiver"
             value={receiverCommand}
-            rows={textFieldRows}
+            rows={receiverCommand.split("\n").length}
           />
         </Grid>
         <Grid item xs={12}>
-          <RadioInput
-            label="E2E encryption"
-            value={e2ee}
-            onChange={(e2ee) => {
-              setTextFieldRows(e2ee === "gpg" ? 2 : 1);
-              setE2ee(e2ee);
-            }}
-            selections={
-              [
-                { label: 'openssl', value: 'openssl' },
-                { label: 'gpg', value: 'gpg' },
-              ]
-            }
-            style={{marginRight: '1rem'}}
-          />
+          { e2eeSelectionElement }
           <RadioInput
             label="Integrity"
             value={integrity}
