@@ -89,6 +89,7 @@ export function Main() {
   const portForwardPath2State = useWatchingUpdate(() => {
     return `bbb${randomString}`;
   }, [randomString]);
+  const portForwardingHost = useState('localhost');
   // NOTE: ports are string because number does not allow empty input
   // NOTE: these states are shared between components
   const serverHostPortState = useState('22');
@@ -106,8 +107,8 @@ export function Main() {
     toTitledComponent(tarDirTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(e2eeTarDirTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(zipDirTransfer, {pipingServerUrl, randomString}),
-    toTitledComponent(portForwarding, {pipingServerUrl, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState}),
-    toTitledComponent(e2eePortForwarding, {pipingServerUrl, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState}),
+    toTitledComponent(portForwarding, {pipingServerUrl, hostState: portForwardingHost, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState}),
+    toTitledComponent(e2eePortForwarding, {pipingServerUrl, hostState: portForwardingHost, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState}),
   ];
 
   const searches = ({title, searchTags}: TitleComponent): boolean => {

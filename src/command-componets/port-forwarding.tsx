@@ -34,14 +34,16 @@ function generatePassword(passwordLen: number): string {
 export const portForwarding = {
   title: 'Port forwarding',
   searchTags: ['tunnel'],
-  component: ({pipingServerUrl, path1State, path2State, clientHostServeState, serverHostPortState, clientHostPortState}: {
+  component: ({pipingServerUrl, hostState, path1State, path2State, clientHostServeState, serverHostPortState, clientHostPortState}: {
     pipingServerUrl: string,
+    hostState: ReactState<string>,
     path1State: ReactState<string>,
     path2State: ReactState<string>,
     clientHostServeState: ReactState<ClientHostServe>,
     serverHostPortState: ReactState<string>,
     clientHostPortState: ReactState<string>
   }) => {
+    const [host, setHost] = hostState;
     const [path1, setPath1] = path1State;
     const [path2, setPath2] = path2State;
     const [serverHostPort, setServerHostPort] = serverHostPortState;
@@ -72,7 +74,7 @@ export const portForwarding = {
     const serverHostCommand = [
       `curl -sSN ${urlJoin(pipingServerUrl, path1)}`,
       ...decryptIfNeed,
-      `nc localhost ${serverHostPort}`,
+      `nc ${host} ${serverHostPort}`,
       ...encryptIfNeed,
       `curl -sSNT - ${urlJoin(pipingServerUrl, path2)}`
     ].join(' | ');
@@ -105,6 +107,8 @@ export const portForwarding = {
           />
         </Grid>
         <Grid item xs={12}>
+          <TextField label="host" value={host} onChange={(e) => setHost(e.target.value)}/>
+          <span style={{marginRight: '1rem'}} />
           <TextField label="server host port" type="number" value={serverHostPort} onChange={(e) => setServerHostPort(e.target.value)} style={{marginRight: '0.5rem'}}/>
           <TextField label="client host port" type="number" value={clientHostPort} onChange={(e) => setClientHostPort(e.target.value)}/>
           <span style={{marginRight: '1rem'}} />
@@ -164,14 +168,16 @@ export const portForwarding = {
 export const e2eePortForwarding = {
   title: 'Port forwarding (E2EE inputting pass)',
   searchTags: ['tunnel', 'e2ee', 'end-to-end', 'encryption'],
-  component: ({pipingServerUrl, path1State, path2State, clientHostServeState, serverHostPortState, clientHostPortState}: {
+  component: ({pipingServerUrl, hostState, path1State, path2State, clientHostServeState, serverHostPortState, clientHostPortState}: {
     pipingServerUrl: string,
+    hostState: ReactState<string>,
     path1State: ReactState<string>,
     path2State: ReactState<string>,
     clientHostServeState: ReactState<ClientHostServe>,
     serverHostPortState: ReactState<string>,
     clientHostPortState: ReactState<string>
   }) => {
+    const [host, setHost] = hostState;
     const [path1, setPath1] = path1State;
     const [path2, setPath2] = path2State;
     const [serverHostPort, setServerHostPort] = serverHostPortState;
@@ -183,7 +189,7 @@ export const e2eePortForwarding = {
     const serverHostCommand = [
       `read -p "password: " -s pass && curl -sSN ${urlJoin(pipingServerUrl, path1)}`,
       decryptCommand,
-      `nc localhost ${serverHostPort}`,
+      `nc ${host} ${serverHostPort}`,
       encryptCommand,
       `curl -sSNT - ${urlJoin(pipingServerUrl, path2)}`
     ].join(' | ') + "; unset pass";
@@ -212,6 +218,8 @@ export const e2eePortForwarding = {
           />
         </Grid>
         <Grid item xs={12}>
+          <TextField label="host" value={host} onChange={(e) => setHost(e.target.value)}/>
+          <span style={{marginRight: '1rem'}} />
           <TextField label="server host port" type="number" value={serverHostPort} onChange={(e) => setServerHostPort(e.target.value)} style={{marginRight: '0.5rem'}}/>
           <TextField label="client host port" type="number" value={clientHostPort} onChange={(e) => setClientHostPort(e.target.value)}/>
           <span style={{marginRight: '1rem'}} />
