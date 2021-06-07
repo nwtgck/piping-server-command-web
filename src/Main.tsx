@@ -16,7 +16,7 @@ import {e2eeFileTransfer, fileTransfer} from "./command-componets/file-transfer"
 import {clipboardTransfer} from "./command-componets/clipboard-transfer";
 import {zipDirTransfer} from "./command-componets/zip-dir-transfer";
 import {e2eeTarDirTransfer, tarDirTransfer} from "./command-componets/tar-dir-transfer";
-import {ClientHostServe, e2eePortForwarding, portForwarding} from "./command-componets/port-forwarding";
+import {ClientHostServe, Multiplexer, e2eePortForwarding, portForwarding} from "./command-componets/port-forwarding";
 import {useWatchingUpdate} from "@/utils";
 
 type TitleComponent = { title: string, searchTags: string[], element: JSX.Element };
@@ -97,6 +97,7 @@ export function Main() {
   // NOTE: nc -lp should be default because BSD nc emits an error when using `nc -lp`, but GNU nc has no error when using `nc -l` for noticing users proper command.
   // NOTE: this state is shared between components
   const clientHostServeState = useState<ClientHostServe>('nc -lp');
+  const multiplexerState = useState<Multiplexer>('none');
 
   const paperStyle = {padding: '1rem', marginBottom: '1.5rem'};
 
@@ -107,8 +108,8 @@ export function Main() {
     toTitledComponent(tarDirTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(e2eeTarDirTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(zipDirTransfer, {pipingServerUrl, randomString}),
-    toTitledComponent(portForwarding, {pipingServerUrl, hostState: portForwardingHost, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState}),
-    toTitledComponent(e2eePortForwarding, {pipingServerUrl, hostState: portForwardingHost, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState}),
+    toTitledComponent(portForwarding, {pipingServerUrl, hostState: portForwardingHost, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState, multiplexerState}),
+    toTitledComponent(e2eePortForwarding, {pipingServerUrl, hostState: portForwardingHost, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState, multiplexerState}),
   ];
 
   const searches = ({title, searchTags}: TitleComponent): boolean => {

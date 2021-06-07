@@ -5,9 +5,9 @@ import FormLabel from '@material-ui/core/FormLabel';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 
-export function RadioInput<T extends string>(props: { value: T, onChange: (v: T) => void, label: string, style?: React.CSSProperties, selections: readonly {value: T, label: string}[]}) {
+export function RadioInput<T extends string>(props: { value: T, onChange: (v: T) => void, label: string, style?: React.CSSProperties, selections: readonly {value: T, label: string}[], disabled?: boolean}) {
   return (
-    <FormControl style={props.style}>
+    <FormControl style={props.style} disabled={props.disabled ?? false}>
       <FormLabel>{props.label}</FormLabel>
       <RadioGroup row aria-label="position" name="position" value={props.value} onChange={(e) => props.onChange(e.target.value as T)}>
         {

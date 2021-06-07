@@ -9,11 +9,16 @@ import {RadioInput} from "@/RadioInput";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import {textFieldContainerGridSpacing} from "./share";
-import {ReactState, useWatchingUpdate} from "@/utils";
+import type {ReactState} from "@/utils";
 
+export type Multiplexer = 'none' | 'yamux';
 export type ClientHostServe = 'nc -l' | 'nc -lp' | 'socat';
 
-function getClientHostServeCommand(clientHostServe: ClientHostServe, clientHostPort: string): string {
+function getClientHostServeCommand(multiplexer: Multiplexer, clientHostServe: ClientHostServe, clientHostPort: string): string {
+  switch (multiplexer) {
+    case "yamux": return `yamux -l ${clientHostPort}`;
+    case "none": break;
+  }
   switch (clientHostServe) {
     case 'nc -l':
     case 'nc -lp':
@@ -34,14 +39,15 @@ function generatePassword(passwordLen: number): string {
 export const portForwarding = {
   title: 'Port forwarding',
   searchTags: ['tunnel'],
-  component: ({pipingServerUrl, hostState, path1State, path2State, clientHostServeState, serverHostPortState, clientHostPortState}: {
+  component: ({pipingServerUrl, hostState, path1State, path2State, clientHostServeState, serverHostPortState, clientHostPortState, multiplexerState}: {
     pipingServerUrl: string,
     hostState: ReactState<string>,
     path1State: ReactState<string>,
     path2State: ReactState<string>,
     clientHostServeState: ReactState<ClientHostServe>,
     serverHostPortState: ReactState<string>,
-    clientHostPortState: ReactState<string>
+    clientHostPortState: ReactState<string>,
+    multiplexerState: ReactState<Multiplexer>,
   }) => {
     const [host, setHost] = hostState;
     const [path1, setPath1] = path1State;
@@ -52,6 +58,7 @@ export const portForwarding = {
     const [e2ee, setE2ee] = useState<'none' | 'openssl'>('none');
     const [opensslPass, setOpensslPass] = useState(generatePassword(20));
     const [opensslPassIsVisible, setOpensslPassIsVisible] = useState(true);
+    const [multiplexer, setMultiplexer] = multiplexerState;
 
     const encryptIfNeed = (() => {
       switch (e2ee) {
@@ -71,17 +78,24 @@ export const portForwarding = {
       }
     })();
 
+    const serverHostDialCommand = (() => {
+      switch (multiplexer) {
+        case "none": return `nc ${host} ${serverHostPort}`;
+        case "yamux": return `yamux ${host} ${serverHostPort}`;
+      }
+    })();
+
     const serverHostCommand = [
       `curl -sSN ${urlJoin(pipingServerUrl, path1)}`,
       ...decryptIfNeed,
-      `nc ${host} ${serverHostPort}`,
+      serverHostDialCommand,
       ...encryptIfNeed,
       `curl -sSNT - ${urlJoin(pipingServerUrl, path2)}`
     ].join(' | ');
     const clientHostCommand = [
       `curl -sSN ${urlJoin(pipingServerUrl, path2)}`,
       ...decryptIfNeed,
-      getClientHostServeCommand(clientHostServe, clientHostPort),
+      getClientHostServeCommand(multiplexer, clientHostServe, clientHostPort),
       ...encryptIfNeed,
       `curl -sSNT - ${urlJoin(pipingServerUrl, path1)}`
     ].join(' | ');
@@ -128,6 +142,7 @@ export const portForwarding = {
                 { label: 'socat', value: 'socat' },
               ]
             }
+            disabled={multiplexer !== 'none'}
           />
 
           <RadioInput
@@ -158,6 +173,19 @@ export const portForwarding = {
             </>
             : undefined
           }
+
+          <RadioInput
+            style={{marginRight: '1rem'}}
+            label="Multiplexer"
+            value={multiplexer}
+            onChange={setMultiplexer}
+            selections={
+              [
+                { label: 'none', value: 'none' },
+                { label: 'yamux', value: 'yamux' },
+              ]
+            }
+          />
         </Grid>
       </Grid>
     )
@@ -168,14 +196,15 @@ export const portForwarding = {
 export const e2eePortForwarding = {
   title: 'Port forwarding (E2EE inputting pass)',
   searchTags: ['tunnel', 'e2ee', 'end-to-end', 'encryption'],
-  component: ({pipingServerUrl, hostState, path1State, path2State, clientHostServeState, serverHostPortState, clientHostPortState}: {
+  component: ({pipingServerUrl, hostState, path1State, path2State, clientHostServeState, serverHostPortState, clientHostPortState, multiplexerState}: {
     pipingServerUrl: string,
     hostState: ReactState<string>,
     path1State: ReactState<string>,
     path2State: ReactState<string>,
     clientHostServeState: ReactState<ClientHostServe>,
     serverHostPortState: ReactState<string>,
-    clientHostPortState: ReactState<string>
+    clientHostPortState: ReactState<string>,
+    multiplexerState: ReactState<Multiplexer>,
   }) => {
     const [host, setHost] = hostState;
     const [path1, setPath1] = path1State;
@@ -183,20 +212,27 @@ export const e2eePortForwarding = {
     const [serverHostPort, setServerHostPort] = serverHostPortState;
     const [clientHostPort, setClientHostPort] = clientHostPortState;
     const [clientHostServe, setClientHostServe] = clientHostServeState;
+    const [multiplexer, setMultiplexer] = multiplexerState;
 
+    const serverHostDialCommand = (() => {
+      switch (multiplexer) {
+        case "none": return `nc ${host} ${serverHostPort}`;
+        case "yamux": return `yamux ${host} ${serverHostPort}`;
+      }
+    })();
     const encryptCommand = `stdbuf -i0 -o0 openssl aes-256-ctr -pass "pass:$pass" -bufsize 1 -pbkdf2`;
     const decryptCommand = `stdbuf -i0 -o0 openssl aes-256-ctr -d -pass "pass:$pass" -bufsize 1 -pbkdf2`;
     const serverHostCommand = [
       `read -p "password: " -s pass && curl -sSN ${urlJoin(pipingServerUrl, path1)}`,
       decryptCommand,
-      `nc ${host} ${serverHostPort}`,
+      serverHostDialCommand,
       encryptCommand,
       `curl -sSNT - ${urlJoin(pipingServerUrl, path2)}`
     ].join(' | ') + "; unset pass";
     const clientHostCommand = [
       `read -p "password: " -s pass && curl -sSN ${urlJoin(pipingServerUrl, path2)}`,
       decryptCommand,
-      getClientHostServeCommand(clientHostServe, clientHostPort),
+      getClientHostServeCommand(multiplexer, clientHostServe, clientHostPort),
       encryptCommand,
       `curl -sSNT - ${urlJoin(pipingServerUrl, path1)}`
     ].join(' | ') + "; unset pass";
@@ -237,6 +273,20 @@ export const e2eePortForwarding = {
                 { label: 'GNU: nc -lp', value: 'nc -lp' },
                 { label: 'BSD: nc -l', value: 'nc -l' },
                 { label: 'socat', value: 'socat' },
+              ]
+            }
+            disabled={multiplexer !== 'none'}
+          />
+
+          <RadioInput
+            style={{marginRight: '1rem'}}
+            label="Multiplexer"
+            value={multiplexer}
+            onChange={setMultiplexer}
+            selections={
+              [
+                { label: 'none', value: 'none' },
+                { label: 'yamux', value: 'yamux' },
               ]
             }
           />
