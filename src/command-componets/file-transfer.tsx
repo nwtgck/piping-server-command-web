@@ -10,7 +10,7 @@ import FormLabel from "@material-ui/core/FormLabel";
 import {TextFieldWithCopy} from "@/TextFieldWithCopy";
 import {textFieldContainerGridSpacing} from "./share";
 import {RadioInput} from "@/RadioInput";
-import {ReactState} from "@/utils";
+import type {ReactState} from "@/utils";
 import {generalE2eeCommandsAndElement} from "@/command-componets/e2ee";
 
 export const fileTransfer = {

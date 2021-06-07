@@ -1,4 +1,4 @@
-import {ReactState} from "@/utils";
+import type {ReactState} from "@/utils";
 import {RadioInput} from "@/RadioInput";
 import * as React from "react";
 
