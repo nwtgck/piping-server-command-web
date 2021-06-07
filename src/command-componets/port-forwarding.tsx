@@ -77,11 +77,11 @@ export const portForwarding = {
       `curl -sSNT - ${urlJoin(pipingServerUrl, path2)}`
     ].join(' | ');
     const clientHostCommand = [
-      `curl -NsS ${urlJoin(pipingServerUrl, path2)}`,
+      `curl -sSN ${urlJoin(pipingServerUrl, path2)}`,
       ...decryptIfNeed,
       getClientHostServeCommand(clientHostServe, clientHostPort),
       ...encryptIfNeed,
-      `curl -NsST - ${urlJoin(pipingServerUrl, path1)}`
+      `curl -sSNT - ${urlJoin(pipingServerUrl, path1)}`
     ].join(' | ');
 
     const textFieldRows = e2ee === 'openssl' ? 3 : 1;
@@ -188,11 +188,11 @@ export const e2eePortForwarding = {
       `curl -sSNT - ${urlJoin(pipingServerUrl, path2)}`
     ].join(' | ') + "; unset pass";
     const clientHostCommand = [
-      `read -p "password: " -s pass &&  curl -NsS ${urlJoin(pipingServerUrl, path2)}`,
+      `read -p "password: " -s pass && curl -sSN ${urlJoin(pipingServerUrl, path2)}`,
       decryptCommand,
       getClientHostServeCommand(clientHostServe, clientHostPort),
       encryptCommand,
-      `curl -NsST - ${urlJoin(pipingServerUrl, path1)}`
+      `curl -sSNT - ${urlJoin(pipingServerUrl, path1)}`
     ].join(' | ') + "; unset pass";
 
     return (
