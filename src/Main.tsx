@@ -14,7 +14,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import ClearIcon from '@material-ui/icons/Clear';
 import {e2eeFileTransfer, fileTransfer} from "./command-componets/file-transfer";
 import {clipboardTransfer} from "./command-componets/clipboard-transfer";
-import {zipDirTransfer} from "./command-componets/zip-dir-transfer";
+import {e2eeZipDirTransfer, zipDirTransfer} from "./command-componets/zip-dir-transfer";
 import {e2eeTarDirTransfer, tarDirTransfer} from "./command-componets/tar-dir-transfer";
 import {ClientHostServe, Multiplexer, e2eePortForwarding, portForwarding} from "./command-componets/port-forwarding";
 import {useWatchingUpdate} from "@/utils";
@@ -108,6 +108,7 @@ export function Main() {
     toTitledComponent(tarDirTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(e2eeTarDirTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(zipDirTransfer, {pipingServerUrl, randomString}),
+    toTitledComponent(e2eeZipDirTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(portForwarding, {pipingServerUrl, hostState: portForwardingHost, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState, multiplexerState}),
     toTitledComponent(e2eePortForwarding, {pipingServerUrl, hostState: portForwardingHost, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState, multiplexerState}),
   ];
