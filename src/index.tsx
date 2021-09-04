@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import Typography from '@material-ui/core/Typography';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
+import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from '@material-ui/core/CssBaseline';
 import {Main} from "./Main";
 import {indigo, pink} from "@material-ui/core/colors";
@@ -24,7 +24,7 @@ function App() {
       main: secondary[200],
       dark: secondary[300],
     };
-    return createMuiTheme({
+    return createTheme({
       palette: {
         type: prefersDarkMode ? 'dark' : undefined,
         primary: prefersDarkMode ? darkPrimary : undefined,
