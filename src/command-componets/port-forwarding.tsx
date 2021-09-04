@@ -24,7 +24,7 @@ function getClientHostServeCommand(multiplexer: Multiplexer, clientHostServe: Cl
     case 'nc -lp':
       return `${clientHostServe} ${clientHostPort}`;
     case 'socat':
-      return `socat TCP-LISTEN:${clientHostPort} -`;
+      return `socat TCP-LISTEN:${clientHostPort},reuseaddr -`;
   }
 }
 
