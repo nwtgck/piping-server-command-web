@@ -13,15 +13,15 @@
   "author": "Ryo Ota <nwtgck@nwtgck.org>",
   "license": "MIT",
   "devDependencies": {
-    "@types/react": "^16.14.14",
+    "@types/react": "^16.14.15",
     "@types/react-dom": "^16.9.14",
     "@types/url-join": "^4.0.1",
     "babel-loader": "^8.2.2",
     "html-webpack-plugin": "^5.3.2",
     "ts-loader": "^9.2.5",
     "tsconfig-paths-webpack-plugin": "^3.5.1",
-    "typescript": "^4.4.2",
-    "webpack": "^5.52.0",
+    "typescript": "^4.4.3",
+    "webpack": "^5.53.0",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.2"
   },
