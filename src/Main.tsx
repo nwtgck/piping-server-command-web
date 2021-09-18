@@ -94,9 +94,8 @@ export function Main() {
   // NOTE: these states are shared between components
   const serverHostPortState = useState('22');
   const clientHostPortState = useState('1022');
-  // NOTE: nc -lp should be default because BSD nc emits an error when using `nc -lp`, but GNU nc has no error when using `nc -l` for noticing users proper command.
   // NOTE: this state is shared between components
-  const clientHostServeState = useState<ClientHostServe>('nc -lp');
+  const clientHostServeState = useState<ClientHostServe>('nc');
   const multiplexerState = useState<Multiplexer>('none');
 
   const paperStyle = {padding: '1rem', marginBottom: '1.5rem'};

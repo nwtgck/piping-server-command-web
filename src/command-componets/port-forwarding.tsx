@@ -12,7 +12,7 @@ import {textFieldContainerGridSpacing} from "./share";
 import type {ReactState} from "@/utils";
 
 export type Multiplexer = 'none' | 'yamux';
-export type ClientHostServe = 'nc -l' | 'nc -lp' | 'socat';
+export type ClientHostServe = 'nc' | 'nc -l' | 'nc -lp' | 'socat';
 
 function getClientHostServeCommand(multiplexer: Multiplexer, clientHostServe: ClientHostServe, clientHostPort: string): string {
   switch (multiplexer) {
@@ -20,6 +20,8 @@ function getClientHostServeCommand(multiplexer: Multiplexer, clientHostServe: Cl
     case "none": break;
   }
   switch (clientHostServe) {
+    case 'nc':
+      return `( nc -lp ${clientHostPort} 2>/dev/null || nc -l ${clientHostPort} )`;
     case 'nc -l':
     case 'nc -lp':
       return `${clientHostServe} ${clientHostPort}`;
@@ -137,6 +139,7 @@ export const portForwarding = {
             onChange={setClientHostServe}
             selections={
               [
+                { label: 'nc', value: 'nc' },
                 { label: 'GNU: nc -lp', value: 'nc -lp' },
                 { label: 'BSD: nc -l', value: 'nc -l' },
                 { label: 'socat', value: 'socat' },
@@ -270,6 +273,7 @@ export const e2eePortForwarding = {
             onChange={setClientHostServe}
             selections={
               [
+                { label: 'nc', value: 'nc' },
                 { label: 'GNU: nc -lp', value: 'nc -lp' },
                 { label: 'BSD: nc -l', value: 'nc -l' },
                 { label: 'socat', value: 'socat' },
