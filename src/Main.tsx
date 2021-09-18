@@ -93,7 +93,7 @@ export function Main() {
   // NOTE: ports are string because number does not allow empty input
   // NOTE: these states are shared between components
   const serverHostPortState = useState('22');
-  const clientHostPortState = useState('1022');
+  const clientHostPortState = useState('2222');
   // NOTE: this state is shared between components
   const clientHostServeState = useState<ClientHostServe>('nc');
   const multiplexerState = useState<Multiplexer>('none');
