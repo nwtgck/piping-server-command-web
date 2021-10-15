@@ -13,7 +13,7 @@
   "author": "Ryo Ota <nwtgck@nwtgck.org>",
   "license": "MIT",
   "devDependencies": {
-    "@types/react": "^16.14.15",
+    "@types/react": "^17.0.30",
     "@types/react-dom": "^16.9.14",
     "@types/url-join": "^4.0.1",
     "babel-loader": "^8.2.2",
