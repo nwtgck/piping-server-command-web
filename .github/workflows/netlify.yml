@@ -1,7 +1,14 @@
 name: Build and Deploy to Netlify
+
 on:
   push:
   pull_request:
+
+permissions:
+  contents: read
+  statuses: write
+  deployments: write
+
 jobs:
   build:
     runs-on: ubuntu-18.04
