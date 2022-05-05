@@ -37,7 +37,7 @@ function CommandSearch({searchKeyword, setSearchKeyword}: {searchKeyword: string
       <OutlinedInput
         type="text"
         value={searchKeyword}
-        placeholder={'e.g. folder'}
+        placeholder={'e.g. folder, port forwarding'}
         onChange={(e) => setSearchKeyword(e.target.value)}
         startAdornment={<SearchIcon/>}
         autoFocus
