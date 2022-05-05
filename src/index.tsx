@@ -6,6 +6,8 @@ import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from '@material-ui/core/CssBaseline';
 import {Main} from "./Main";
 import {indigo, pink} from "@material-ui/core/colors";
+import GitHubIcon from '@material-ui/icons/GitHub';
+import Link from '@material-ui/core/Link';
 
 function App() {
   // (base: https://github.com/mui-org/material-ui/blob/25acfab1471080223e308cb0d337dae3832f740f/docs/src/pages/customization/palette/palette.md#system-preference)
@@ -39,6 +41,8 @@ function App() {
         <CssBaseline/>
         <Typography variant="h4" component="h2" style={{textAlign: 'center', marginTop: '1rem'}}>
           Piping Server Command Sheet
+          {" "}
+          <Link href="https://github.com/nwtgck/piping-server-command-web" color="inherit"><GitHubIcon fontSize="inherit" style={{paddingTop: '0.3rem'}}/></Link>
         </Typography>
         <Main />
       </ThemeProvider>
