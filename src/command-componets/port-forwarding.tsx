@@ -40,7 +40,7 @@ function generatePassword(passwordLen: number): string {
 
 export const portForwarding = {
   title: 'Port forwarding',
-  searchTags: ['tunnel'],
+  searchTags: ['tunneling'],
   component: ({pipingServerUrl, hostState, path1State, path2State, clientHostServeState, serverHostPortState, clientHostPortState, multiplexerState}: {
     pipingServerUrl: string,
     hostState: ReactState<string>,
@@ -198,7 +198,7 @@ export const portForwarding = {
 // split components and a little duplicate because easy to access to this command sheet
 export const e2eePortForwarding = {
   title: 'Port forwarding (E2EE inputting pass)',
-  searchTags: ['tunnel', 'e2ee', 'end-to-end', 'encryption'],
+  searchTags: ['tunneling', 'e2ee', 'end-to-end', 'encryption'],
   component: ({pipingServerUrl, hostState, path1State, path2State, clientHostServeState, serverHostPortState, clientHostPortState, multiplexerState}: {
     pipingServerUrl: string,
     hostState: ReactState<string>,
