@@ -13,7 +13,7 @@
   "author": "Ryo Ota <nwtgck@nwtgck.org>",
   "license": "MIT",
   "devDependencies": {
-    "@types/react": "^17.0.47",
+    "@types/react": "^18.0.14",
     "@types/react-dom": "^17.0.17",
     "babel-loader": "^8.2.5",
     "html-webpack-plugin": "^5.5.0",
@@ -29,8 +29,8 @@
     "@material-ui/icons": "^4.11.3",
     "@material-ui/lab": "^4.0.0-alpha.60",
     "clipboard-copy": "^4.0.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "url-join": "^5.0.0"
   }
 }
