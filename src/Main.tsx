@@ -19,9 +19,9 @@ import {e2eeTarDirTransfer, tarDirTransfer} from "./command-componets/tar-dir-tr
 import {ClientHostServe, Multiplexer, e2eePortForwarding, portForwarding} from "./command-componets/port-forwarding";
 import {useWatchingUpdate} from "@/utils";
 
-type TitleComponent = { title: string, searchTags: string[], element: JSX.Element };
+type TitleComponent = { title: string, searchTags: string[], element: React.JSX.Element };
 
-function toTitledComponent<Props>({title, searchTags, component}: { title: string, searchTags: string[], component: (props: Props) => JSX.Element }, props: Props): TitleComponent {
+function toTitledComponent<Props>({title, searchTags, component}: { title: string, searchTags: string[], component: (props: Props) => React.JSX.Element }, props: Props): TitleComponent {
   return {
     title,
     searchTags,

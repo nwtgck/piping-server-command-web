@@ -2,7 +2,7 @@ import type {ReactState} from "@/utils";
 import {RadioInput} from "@/RadioInput";
 import * as React from "react";
 
-export function generalE2eeCommandsAndElement(params: {e2eeState: ReactState<'openssl' | 'gpg'>, opensslCipherAlgorithmState: ReactState<'aes-256-cbc'>}): { e2eePrepend: string, e2eeEncryptCommand: string, e2eeDecryptCommand: string, e2eeSelectionElement: JSX.Element } {
+export function generalE2eeCommandsAndElement(params: {e2eeState: ReactState<'openssl' | 'gpg'>, opensslCipherAlgorithmState: ReactState<'aes-256-cbc'>}): { e2eePrepend: string, e2eeEncryptCommand: string, e2eeDecryptCommand: string, e2eeSelectionElement: React.JSX.Element } {
   const [e2ee, setE2ee] = params.e2eeState;
   const [opensslCipherAlgorithm, setOpensslCipherAlgorithm] = params.opensslCipherAlgorithmState;
   const e2eeEncryptCommand = (() => {
