@@ -18,6 +18,7 @@ import {e2eeZipDirTransfer, zipDirTransfer} from "./command-componets/zip-dir-tr
 import {e2eeTarDirTransfer, tarDirTransfer} from "./command-componets/tar-dir-transfer";
 import {ClientHostServe, Multiplexer, e2eePortForwarding, portForwarding} from "./command-componets/port-forwarding";
 import {useWatchingUpdate} from "@/utils";
+import {sshfs} from "@/command-componets/sshfs";
 
 type TitleComponent = { title: string, searchTags: string[], element: React.JSX.Element };
 
@@ -83,9 +84,11 @@ export function Main() {
   const [searchKeyword, setSearchKeyword] = useState(parseHashAsQuery().get(keywordQueryParamName) ?? '');
   const fileTransferIntegrityState = useState<'none' | 'shasum'>('none');
   const fileTransferUsesPvState = useState(false);
+  // TODO: rename?
   const portForwardPath1State = useWatchingUpdate(() => {
     return `aaa${randomString}`;
   }, [randomString]);
+  // TODO: rename?
   const portForwardPath2State = useWatchingUpdate(() => {
     return `bbb${randomString}`;
   }, [randomString]);
@@ -110,6 +113,7 @@ export function Main() {
     toTitledComponent(e2eeZipDirTransfer, {pipingServerUrl, randomString}),
     toTitledComponent(portForwarding, {pipingServerUrl, hostState: portForwardingHost, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState, multiplexerState}),
     toTitledComponent(e2eePortForwarding, {pipingServerUrl, hostState: portForwardingHost, path1State: portForwardPath1State, path2State: portForwardPath2State, clientHostServeState, serverHostPortState, clientHostPortState, multiplexerState}),
+    toTitledComponent(sshfs, {pipingServerUrl, path1State: portForwardPath1State, path2State: portForwardPath2State}),
   ];
 
   const searches = ({title, searchTags}: TitleComponent): boolean => {
