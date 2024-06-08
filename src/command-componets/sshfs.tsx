@@ -10,12 +10,15 @@ import FormLabel from "@material-ui/core/FormLabel";
 import {TextFieldWithCopy} from "@/TextFieldWithCopy";
 import {textFieldContainerGridSpacing} from "./share";
 import {RadioInput} from "@/RadioInput";
-import type {ReactState} from "@/utils";
+import {generateShellSafePassword, type ReactState} from "@/utils";
 import TextField from "@material-ui/core/TextField";
+import IconButton from "@material-ui/core/IconButton";
+import VisibilityIcon from "@material-ui/icons/Visibility";
+import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 
 export const sshfs = {
   title: "SSHFS",
-  searchTags: ["sshfs", "sftp"],
+  searchTags: ["sshfs", "sftp", "e2ee", "end-to-end", "encryption"],
   component: ({pipingServerUrl, path1State, path2State}: {
     pipingServerUrl: string,
     path1State: ReactState<string>,
@@ -28,6 +31,9 @@ export const sshfs = {
     const [mountDirectoryPath, setMountDirectoryPath] = useState("~/my_mount");
     const [sharerOs, setSharerOs] = useState<"linux" | "macos">("linux");
     const [usesMacSandbox, setUsesMacSandbox] = useState(false);
+    const [e2ee, setE2ee] = useState<'none' | 'openssl'>('none');
+    const [opensslPass, setOpensslPass] = useState(generateShellSafePassword(20));
+    const [opensslPassIsVisible, setOpensslPassIsVisible] = useState(true);
 
     const macOsSftpServer = "/usr/libexec/sftp-server";
     const sftpServerCommand = (() => {
@@ -54,25 +60,59 @@ sandbox-exec -p '
       }
     })();
 
+    // TODO: duplicate
+    const encryptIfNeed: [] | [string] = (() => {
+      switch (e2ee) {
+        case "none":
+          return [];
+        case "openssl":
+          return [ `stdbuf -i0 -o0 openssl aes-256-ctr -pass "pass:${opensslPass}" -bufsize 1 -pbkdf2` ];
+      }
+    })();
+
+    // TODO: duplicate
+    const decryptIfNeed: [] | [string] = (() => {
+      switch (e2ee) {
+        case "none":
+          return [];
+        case "openssl":
+          return [ `stdbuf -i0 -o0 openssl aes-256-ctr -d -pass "pass:${opensslPass}" -bufsize 1 -pbkdf2` ];
+      }
+    })();
+
     const sharerCommand = [
       `curl -sSN ${urlJoin(pipingServerUrl, path1)}`,
+      ...decryptIfNeed,
       [sftpServerCommand, ...(sftpReadonly ? ["-R"] : [])].join(" "),
+      ...encryptIfNeed,
       `curl -sSNT - ${urlJoin(pipingServerUrl, path2)}`,
     ].join(' | ');
 
     const accessorCommand = [
       `curl -sSN ${urlJoin(pipingServerUrl, path2)}`,
+      ...decryptIfNeed,
       `sshfs -o ${[...(sftpReadonly ? ["ro"] : []), "slave"].join(",")} :${sharedDirectoryPath} ${mountDirectoryPath}`,
+      ...encryptIfNeed,
       `curl -sSNT - ${urlJoin(pipingServerUrl, path1)}`,
     ].join(' | ');
 
     return (
       <Grid container spacing={textFieldContainerGridSpacing}>
         <Grid item xs={12}>
-          <TextFieldWithCopy label="Sharer" value={sharerCommand} rows={sharerCommand.split("\n").length}/>
+          <TextFieldWithCopy
+            label="Sharer"
+            value={sharerCommand}
+            isVisible={opensslPassIsVisible}
+            rows={sharerCommand.split("\n").length + (e2ee === 'openssl' ? 2 : 0)}
+          />
         </Grid>
         <Grid item xs={12}>
-          <TextFieldWithCopy label="Accessor" value={accessorCommand} rows={1}/>
+          <TextFieldWithCopy
+            label="Accessor"
+            value={accessorCommand}
+            isVisible={opensslPassIsVisible}
+            rows={1 + (e2ee === 'openssl' ? 2 : 0)}
+          />
         </Grid>
         <Grid item xs={12}>
           <TextField label="path1" value={path1} onChange={(e) => setPath1(e.target.value)}
@@ -125,6 +165,35 @@ sandbox-exec -p '
                 label="enable"/>
             </FormGroup>
           </FormControl>
+          <span style={{marginRight: '1rem'}}/>
+          <RadioInput
+            label="E2E encryption"
+            value={e2ee}
+            onChange={(v) => {
+              setOpensslPassIsVisible(v !== 'openssl');
+              setE2ee(v);
+            }}
+            selections={
+              [
+                {label: 'none', value: 'none'},
+                {label: 'openssl', value: 'openssl'},
+              ]
+            }
+          />
+          {e2ee === "openssl" ?
+            <>
+              <TextField label="openssl pass" value={opensslPass} type={opensslPassIsVisible ? 'text' : 'password'}
+                         onChange={(e) => setOpensslPass(e.target.value)}/>
+              <IconButton
+                style={{marginTop: '0.5rem'}}
+                aria-label="mask or unmask openssl pass"
+                onClick={() => setOpensslPassIsVisible(!opensslPassIsVisible)}
+                edge="end">
+                {opensslPassIsVisible ? <VisibilityIcon/> : <VisibilityOffIcon/>}
+              </IconButton>
+            </>
+            : undefined
+          }
         </Grid>
       </Grid>
     )

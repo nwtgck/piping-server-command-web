@@ -9,7 +9,7 @@ import {RadioInput} from "@/RadioInput";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import {textFieldContainerGridSpacing} from "./share";
-import type {ReactState} from "@/utils";
+import {generateShellSafePassword, type ReactState} from "@/utils";
 
 export type Multiplexer = 'none' | 'yamux';
 export type ClientHostServe = 'nc' | 'nc -l' | 'nc -lp' | 'socat';
@@ -28,14 +28,6 @@ function getClientHostServeCommand(multiplexer: Multiplexer, clientHostServe: Cl
     case 'socat':
       return `socat TCP-LISTEN:${clientHostPort},reuseaddr -`;
   }
-}
-
-function generatePassword(passwordLen: number): string {
-  const alphas  = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
-  const numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
-  const chars   = [...alphas, ...numbers, ];
-  const randomArr = window.crypto.getRandomValues(new Uint32Array(passwordLen));
-  return Array.from(randomArr).map(n => chars[n % chars.length]).join('');
 }
 
 export const portForwarding = {
@@ -58,7 +50,7 @@ export const portForwarding = {
     const [clientHostPort, setClientHostPort] = clientHostPortState;
     const [clientHostServe, setClientHostServe] = clientHostServeState;
     const [e2ee, setE2ee] = useState<'none' | 'openssl'>('none');
-    const [opensslPass, setOpensslPass] = useState(generatePassword(20));
+    const [opensslPass, setOpensslPass] = useState(generateShellSafePassword(20));
     const [opensslPassIsVisible, setOpensslPassIsVisible] = useState(true);
     const [multiplexer, setMultiplexer] = multiplexerState;
 
